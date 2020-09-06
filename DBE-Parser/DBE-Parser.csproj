@@ -97,5 +97,11 @@
   <ItemGroup>
     <Folder Include="Res\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ParsingLib\ParsingLib.csproj">
+      <Project>{fe4cd76f-f547-4a44-b9ec-03b0da2f15cd}</Project>
+      <Name>ParsingLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

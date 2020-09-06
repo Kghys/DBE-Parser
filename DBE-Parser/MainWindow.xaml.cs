@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ParsingLib;
 
 namespace DBE_Parser
 {
@@ -24,6 +25,7 @@ namespace DBE_Parser
     {
         OpenFileDialog file;
         List<string> fileLines = new List<string>();
+        Analyze Analyzing = new Analyze();
 
         public MainWindow()
         {
@@ -36,7 +38,7 @@ namespace DBE_Parser
             file.Multiselect = true;
 
             file.ShowDialog();
-            File.Copy(file.FileName, @"C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\Res\1.txt", true);
+            File.Copy(file.FileName, @"C:\Users\DBE-KG\Documents\GitHub\DBE-Parser\DBE-Parser\Res\1.txt", true);
 
             foreach (String fileName in file.FileNames)
             {
@@ -55,7 +57,7 @@ namespace DBE_Parser
             fileLines.Clear();
             int counter = 0;
             string line;
-            StreamReader fileReader = new StreamReader(@"C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\Res\1.txt");
+            StreamReader fileReader = new StreamReader(@"C:\Users\DBE-KG\Documents\GitHub\DBE-Parser\DBE-Parser\Res\1.txt");
 
             while ((line = fileReader.ReadLine()) != null)
             {
@@ -70,21 +72,9 @@ namespace DBE_Parser
             lstContent.ItemsSource = fileLines;
             lstContent.Items.Refresh();
 
-            CountBoos();
-
+            Analyzing.CountBoos(fileLines);
         }
 
-        private void CountBoos()
-        {
-            int count = 0;
-            for (int i = 0; i < fileLines.Count(); i++)
-            {
-                if (fileLines[i].Contains("boo"))
-                {
-                    count++;
-                }
-            }
-            Console.WriteLine($"er waren {count} BOO's");
-        }
+        
     }
 }
