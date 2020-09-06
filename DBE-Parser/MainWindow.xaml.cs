@@ -27,6 +27,11 @@ namespace DBE_Parser
         List<string> fileLines = new List<string>();
         Analyze Analyzing = new Analyze();
 
+        int booCount = 0;
+        int trfCount = 0; 
+        int logCount = 0;
+        int commentCount = 0;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -38,7 +43,6 @@ namespace DBE_Parser
             file.Multiselect = true;
 
             file.ShowDialog();
-            File.Copy(file.FileName, @"C:\Users\DBE-KG\Documents\GitHub\DBE-Parser\DBE-Parser\Res\1.txt", true);
 
             foreach (String fileName in file.FileNames)
             {
@@ -54,27 +58,41 @@ namespace DBE_Parser
 
         private void BtnConvertFile_Click(object sender, RoutedEventArgs e)
         {
-            fileLines.Clear();
-            int counter = 0;
-            string line;
-            StreamReader fileReader = new StreamReader(@"C:\Users\DBE-KG\Documents\GitHub\DBE-Parser\DBE-Parser\Res\1.txt");
-
-            while ((line = fileReader.ReadLine()) != null)
+            booCount = 0;
+            foreach (string fileName in file.FileNames)
             {
-                System.Console.WriteLine(line);
-                counter++;
-                fileLines.Add(line);
+                fileLines.Clear();
+                int counter = 0;
+                string line;
+                //StreamReader fileReader = new StreamReader(@"C:\Users\DBE-KG\Documents\GitHub\DBE-Parser\DBE-Parser\Res\1.txt");
+                StreamReader fileReader = new StreamReader(fileName);
+                while ((line = fileReader.ReadLine()) != null)
+                {
+                    System.Console.WriteLine(line);
+                    counter++;
+                    fileLines.Add(line);
 
+                }
+
+                fileReader.Close();
+                Console.WriteLine("There were {0} lines.", counter);
+                lstContent.ItemsSource = fileLines;
+                lstContent.Items.Refresh();
+
+                Analyzing.CountBoos(fileLines);
+
+                booCount +=  Analyzing.booCount;
+                trfCount +=  Analyzing.trfCount;
+                logCount +=  Analyzing.logCount;
+                commentCount +=  Analyzing.commentCount;
             }
-
-            fileReader.Close();
-            Console.WriteLine("There were {0} lines.", counter);
-            lstContent.ItemsSource = fileLines;
-            lstContent.Items.Refresh();
-
-            Analyzing.CountBoos(fileLines);
+            txtEditor.Text += $"\n Totale BOO's :  {booCount}";
+            txtEditor.Text += $"\n Totale TRF's :  {trfCount}";
+            txtEditor.Text += $"\n Totale LOG's :  {logCount}";
+            txtEditor.Text += $"\n Totale Comments's :  {commentCount}";
         }
 
         
+
     }
 }

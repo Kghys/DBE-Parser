@@ -9,12 +9,19 @@ namespace ParsingLib
     public class Analyze
     {
 
+        public int booCount { get; set; }
+        public int logCount { get; set; }
+        public int trfCount { get; set; }
+        public int commentCount { get; set; }
+
+
+
         public void CountBoos(List<string> LineToAnalyze)
         {
-            int booCount = 0;
-            int logCount = 0;
-            int trfCount = 0;
-            int commentCount = 0;
+            booCount = 0;
+            logCount = 0;
+            trfCount = 0;
+            commentCount = 0;
             for (int i = 0; i < LineToAnalyze.Count(); i++)
             {
                 if (LineToAnalyze[i].Contains("boo"))

@@ -1,73 +1,14 @@
-BLOC_FONCTION EC_012
+BLOC_FONCTION EC_005
 MODULE_PROGRAMME 1
 
-(* CALCUL POUR VALIDATION EMBRAYAGES ET CELLULES DE CONTROLE
-(* VALEUR INDEXATION CONVOYEUR INTERCALAIRES
-(* NOMBRE INTERCALAIRES A DISTRIBUER
-boo B0093 = val
-log 16#780 = W0130
-log 16#300 = W0131
-log 16#40 = W0132
-log 16#F = W0133
-log 16#3 = W0134
-boo 1 = set B0042
-finval
-boo B0052 = val
-log 16#780 = W0130
-log 16#300 = W0131
-log 16#60 = W0132
-log 16#F = W0133
-log 16#4 = W0134
-boo 1 = set B0042
-finval
-boo B0055 = val
-log 16#FC0 = W0130
-log 16#480 = W0131
-log 16#70 = W0132
-log 16#10 = W0133
-log 16#6 = W0134
-boo 1 = set B0042
-finval
-boo B0060 = val
-log 16#1FE0 = W0130
-log 16#840 = W0131
-log 16#78 = W0132
-log 16#11 = W0133
-log 16#8 = W0134
-boo 1 = set B0042
-finval
-boo B0063 = val
-log 16#FF = W0130
-log 16#42 = W0131
-log 16#3F = W0132
-log 16#C = W0133
-log 16#8 = W0134
-boo 1 = set B0042
-finval
-boo B0066 = val
-log 16#7FE = W0130
-log 16#108 = W0131
-log 16#7E = W0132
-log 16#F = W0133
-log 16#A = W0134
-boo 1 = set B0042
-finval
-boo B0071 = val
-log 16#1FFF = W0130
-log 16#444 = W0131
-log 16#7F = W0132
-log 16#10 = W0133
-log 16#D = W0134
-boo 1 = set B0042
-finval
-boo B0074 = val
-log 16#1FFF = W0130
-log 16#444 = W0131
-log 16#7F = W0132
-log 16#11 = W0133
-log 16#D = W0134
-boo 1 = set B0042
-finval
-boo B0022 = reset B0042
+(* CHOIX FONCTIONNEMENT TRANSFERT NAPPES
+boo E0076 = A0315
+boo E0076 = fm B0910 , B0911
+boo E0077 = fm B0912 , B0913
+boo E0105 = fm B0914 , B0915
+boo B0911 + B0913 + B0915 = B0076
+boo B0076 = set B0077
+boo B0007 = reset B0077
+boo B0077 . / B0970 = fm B0006 , B0007
 
 FIN_BLOC_FONCTION
