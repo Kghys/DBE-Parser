@@ -21,9 +21,10 @@
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Button Name="btnOpenFile" Click="btnOpenFile_Click" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" FontSize="18" >OPEN FILE</Button>
-        <Button Name="btnConvertFile" Click="btnConvertFile_Click" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="1" Background="#FF88D5EC" Foreground="White" FontSize="18" >CONVERT FILE</Button>
-        <Button Name="btnExitFile" Click="btnExitFile_Click" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" FontSize="18" Background="#FFFF8383" >EXIT FILE</Button>
-        <TextBox Name="txtEditor" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Grid.RowSpan="5" />
+        <Button Name="btnOpenFile" Click="BtnOpenFile_Click" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" FontSize="18" >OPEN FILE</Button>
+        <Button Name="btnConvertFile" Click="BtnConvertFile_Click" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="1" Background="#FF88D5EC" Foreground="White" FontSize="18" >CONVERT FILE</Button>
+        <Button Name="btnExitFile" Click="BtnExitFile_Click" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="1" FontSize="18" Background="#FFFF8383" >EXIT FILE</Button>
+        <TextBox Name="txtEditor" Grid.Column="0" Grid.Row="3" Grid.RowSpan="5" Margin="0,0,1,0" />
+        <ListBox Name="lstContent" Grid.Column="1" HorizontalAlignment="Left" Height="262" Margin="1,2,0,0" Grid.Row="3" Grid.RowSpan="5" VerticalAlignment="Top" Width="395"/>
     </Grid>
 </Window>

@@ -22,34 +22,69 @@ namespace DBE_Parser
     /// </summary>
     public partial class MainWindow : Window
     {
+        OpenFileDialog file;
+        List<string> fileLines = new List<string>();
+
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        private void btnOpenFile_Click(object sender, RoutedEventArgs e)
+        private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Multiselect = true;
+            file = new OpenFileDialog();
+            file.Multiselect = true;
 
-            openFileDialog.ShowDialog();
-                
+            file.ShowDialog();
+            File.Copy(file.FileName, @"C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\Res\1.txt", true);
 
-            foreach (String fileName in openFileDialog.FileNames)
+            foreach (String fileName in file.FileNames)
             {
                 txtEditor.Text += $"\n  {fileName }";
             }
-            
+
         }
 
-        private void btnExitFile_Click(object sender, RoutedEventArgs e)
+        private void BtnExitFile_Click(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void btnConvertFile_Click(object sender, RoutedEventArgs e)
+        private void BtnConvertFile_Click(object sender, RoutedEventArgs e)
         {
+            fileLines.Clear();
+            int counter = 0;
+            string line;
+            StreamReader fileReader = new StreamReader(@"C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\Res\1.txt");
 
+            while ((line = fileReader.ReadLine()) != null)
+            {
+                System.Console.WriteLine(line);
+                counter++;
+                fileLines.Add(line);
+
+            }
+
+            fileReader.Close();
+            Console.WriteLine("There were {0} lines.", counter);
+            lstContent.ItemsSource = fileLines;
+            lstContent.Items.Refresh();
+
+            CountBoos();
+
+        }
+
+        private void CountBoos()
+        {
+            int count = 0;
+            for (int i = 0; i < fileLines.Count(); i++)
+            {
+                if (fileLines[i].Contains("boo"))
+                {
+                    count++;
+                }
+            }
+            Console.WriteLine($"er waren {count} BOO's");
         }
     }
 }

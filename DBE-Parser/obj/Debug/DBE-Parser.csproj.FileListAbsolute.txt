@@ -12,3 +12,17 @@ C:\Users\keanu\source\repos\DBE-Parser\DBE-Parser\obj\Debug\DBE_Parser.Propertie
 C:\Users\keanu\source\repos\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser.csproj.GenerateResource.cache
 C:\Users\keanu\source\repos\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser.exe
 C:\Users\keanu\source\repos\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser.pdb
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\bin\Debug\DBE-Parser.exe.config
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\bin\Debug\DBE-Parser.exe
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\bin\Debug\DBE-Parser.pdb
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser.csprojAssemblyReference.cache
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\MainWindow.g.cs
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\App.g.cs
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser_MarkupCompile.cache
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser_MarkupCompile.lref
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\MainWindow.baml
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser.g.resources
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\DBE_Parser.Properties.Resources.resources
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser.csproj.GenerateResource.cache
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser.exe
+C:\Users\keanu\HOWEST\PARSER\DBE-Parser\DBE-Parser\obj\Debug\DBE-Parser.pdb
