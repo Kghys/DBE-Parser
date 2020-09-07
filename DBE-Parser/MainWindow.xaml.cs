@@ -15,6 +15,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ParsingLib;
+using System.Windows.Forms;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace DBE_Parser
 {
@@ -23,14 +25,14 @@ namespace DBE_Parser
     /// </summary>
     public partial class MainWindow : Window
     {
-        OpenFileDialog file;
+        OpenFileDialog fileOpenPaths;
+        FolderBrowserDialog fileSavePaths;
         List<string> fileLines = new List<string>();
-        Analyze Analyzing = new Analyze();
+        List<string> newFileLines = new List<string>();
 
-        int booCount = 0;
-        int trfCount = 0; 
-        int logCount = 0;
-        int commentCount = 0;
+        Analyze Analyzing = new Analyze();
+        Converting converter = new Converting();
+
 
         public MainWindow()
         {
@@ -39,32 +41,43 @@ namespace DBE_Parser
 
         private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-            file = new OpenFileDialog();
-            file.Multiselect = true;
+            fileOpenPaths = new OpenFileDialog();
+            fileOpenPaths.Multiselect = true;
 
-            file.ShowDialog();
-
-            foreach (String fileName in file.FileNames)
-            {
-                txtEditor.Text += $"\n  {fileName }";
-            }
-
-        }
-
-        private void BtnExitFile_Click(object sender, RoutedEventArgs e)
-        {
+            fileOpenPaths.ShowDialog();
 
         }
 
         private void BtnConvertFile_Click(object sender, RoutedEventArgs e)
         {
-            booCount = 0;
-            foreach (string fileName in file.FileNames)
+            fileSavePaths = new FolderBrowserDialog();
+            DialogResult result = fileSavePaths.ShowDialog();
+
+            Console.WriteLine(fileSavePaths.SelectedPath);
+            newFileLines = converter.ConvertSyntax(fileLines);
+
+            lstContent.ItemsSource = newFileLines;
+            lstContent.Items.Refresh();
+        }
+
+        private void BtnAnalyzeFile_Click(object sender, RoutedEventArgs e)
+        {
+            int booCount = 0;
+            int logCount = 0;
+            int trfCount = 0;
+            int tbwCount = 0;
+            int finValCount = 0;
+            int traCount = 0;
+            int siCount = 0;
+            int siNonCount = 0;
+            int calCount = 0;
+            int commentCount = 0;
+
+            foreach (string fileName in fileOpenPaths.FileNames)
             {
                 fileLines.Clear();
                 int counter = 0;
                 string line;
-                //StreamReader fileReader = new StreamReader(@"C:\Users\DBE-KG\Documents\GitHub\DBE-Parser\DBE-Parser\Res\1.txt");
                 StreamReader fileReader = new StreamReader(fileName);
                 while ((line = fileReader.ReadLine()) != null)
                 {
@@ -84,11 +97,23 @@ namespace DBE_Parser
                 booCount +=  Analyzing.booCount;
                 trfCount +=  Analyzing.trfCount;
                 logCount +=  Analyzing.logCount;
+                tbwCount += Analyzing.tbwCount;
+                finValCount += Analyzing.finValCount;
+                traCount += Analyzing.traCount;
+                siCount += Analyzing.siCount;
+                siNonCount += Analyzing.siNonCount;
+                calCount += Analyzing.calCount;
                 commentCount +=  Analyzing.commentCount;
             }
             txtEditor.Text += $"\n Totale BOO's :  {booCount}";
             txtEditor.Text += $"\n Totale TRF's :  {trfCount}";
             txtEditor.Text += $"\n Totale LOG's :  {logCount}";
+            txtEditor.Text += $"\n Totale TBW's :  {tbwCount}";
+            txtEditor.Text += $"\n Totale FINVAL's :  {finValCount}";
+            txtEditor.Text += $"\n Totale TRA's :  {traCount}";
+            txtEditor.Text += $"\n Totale SI's :  {siCount}";
+            txtEditor.Text += $"\n Totale SINON's :  {siNonCount}";
+            txtEditor.Text += $"\n Totale CAL's :  {calCount}";
             txtEditor.Text += $"\n Totale Comments's :  {commentCount}";
         }
 
