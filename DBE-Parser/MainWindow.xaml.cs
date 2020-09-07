@@ -73,6 +73,8 @@ namespace DBE_Parser
             int calCount = 0;
             int commentCount = 0;
 
+            txtEditor.Clear();
+
             foreach (string fileName in fileOpenPaths.FileNames)
             {
                 fileLines.Clear();
