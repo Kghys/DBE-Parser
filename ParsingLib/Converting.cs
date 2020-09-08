@@ -20,10 +20,20 @@ namespace ParsingLib
                 {
                     LineToConvert[i] = LineToConvert[i].Replace(".", "AND");
                     LineToConvert[i] = LineToConvert[i].Replace("+", "OR");
-                    LineToConvert[i] = LineToConvert[i].Replace("=", ":=");
                     LineToConvert[i] = LineToConvert[i].Replace("/", "NOT ");
                     LineToConvert[i] = LineToConvert[i].Replace("boo", "");
 
+                    if (LineToConvert[i].Contains("="))
+                    {
+                        string beforeEqual;
+                        string afterEqual;
+                        string[] splitString = LineToConvert[i].Split('=');
+
+                        beforeEqual = splitString[0];
+                        afterEqual = splitString[1];
+
+                        LineToConvert[i] = afterEqual + " := " + beforeEqual;
+                    }
 
 
                 }

@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using ParsingLib;
 using System.Windows.Forms;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using System.Windows.Forms.VisualStyles;
 
 namespace DBE_Parser
 {
@@ -54,10 +55,32 @@ namespace DBE_Parser
             DialogResult result = fileSavePaths.ShowDialog();
 
             Console.WriteLine(fileSavePaths.SelectedPath);
-            newFileLines = converter.ConvertSyntax(fileLines);
+
+            foreach (string fileName in fileOpenPaths.FileNames)
+            {
+                string onlyFileName = System.IO.Path.GetFileNameWithoutExtension(fileName);
+                newFileLines.Clear();
+                fileLines.Clear();
+                string line;
+                StreamReader fileReader = new StreamReader(fileName);
+                while ((line = fileReader.ReadLine()) != null)
+                {
+                    fileLines.Add(line);
+                }
+                fileReader.Close();
+
+                newFileLines = converter.ConvertSyntax(fileLines);
+
+                File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
+            }
+
+
+
 
             lstContent.ItemsSource = newFileLines;
             lstContent.Items.Refresh();
+
+
         }
 
         private void BtnAnalyzeFile_Click(object sender, RoutedEventArgs e)
@@ -96,16 +119,16 @@ namespace DBE_Parser
 
                 Analyzing.CountBoos(fileLines);
 
-                booCount +=  Analyzing.booCount;
-                trfCount +=  Analyzing.trfCount;
-                logCount +=  Analyzing.logCount;
+                booCount += Analyzing.booCount;
+                trfCount += Analyzing.trfCount;
+                logCount += Analyzing.logCount;
                 tbwCount += Analyzing.tbwCount;
                 finValCount += Analyzing.finValCount;
                 traCount += Analyzing.traCount;
                 siCount += Analyzing.siCount;
                 siNonCount += Analyzing.siNonCount;
                 calCount += Analyzing.calCount;
-                commentCount +=  Analyzing.commentCount;
+                commentCount += Analyzing.commentCount;
             }
             txtEditor.Text += $"\n Totale BOO's :  {booCount}";
             txtEditor.Text += $"\n Totale TRF's :  {trfCount}";
@@ -119,7 +142,7 @@ namespace DBE_Parser
             txtEditor.Text += $"\n Totale Comments's :  {commentCount}";
         }
 
-        
+
 
     }
 }
