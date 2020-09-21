@@ -10,8 +10,14 @@ namespace ParsingLib
     {
 
 
-        public List<string> ConvertSyntax(List<string> LineToConvert)
+        public List<string> ConvertSyntax(List<string> LineToConvert,string blockName)
         {
+
+            LineToConvert[0] = $"FUNCTION \"{blockName}\" : Void";
+            LineToConvert[1] = "{ S7_Optimized_Acces := 'TRUE'}";
+            LineToConvert[2] = "VERSION : 0.1";
+            LineToConvert[3] = "BEGIN";
+
 
             for (int i = 0; i < LineToConvert.Count(); i++)
             {
@@ -36,11 +42,14 @@ namespace ParsingLib
                     }
 
 
+                LineToConvert[i] = LineToConvert[i] + ";";
                 }
 
 
 
             }
+
+            LineToConvert.Add("END_FUNCTION");
             return LineToConvert;
         }
 

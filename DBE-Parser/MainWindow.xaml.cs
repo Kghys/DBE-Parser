@@ -55,24 +55,32 @@ namespace DBE_Parser
             DialogResult result = fileSavePaths.ShowDialog();
 
             Console.WriteLine(fileSavePaths.SelectedPath);
-
-            foreach (string fileName in fileOpenPaths.FileNames)
+            try
             {
-                string onlyFileName = System.IO.Path.GetFileNameWithoutExtension(fileName);
-                newFileLines.Clear();
-                fileLines.Clear();
-                string line;
-                StreamReader fileReader = new StreamReader(fileName);
-                while ((line = fileReader.ReadLine()) != null)
+                foreach (string fileName in fileOpenPaths.FileNames)
                 {
-                    fileLines.Add(line);
+                    string onlyFileName = System.IO.Path.GetFileNameWithoutExtension(fileName);
+                    newFileLines.Clear();
+                    fileLines.Clear();
+                    string line;
+                    StreamReader fileReader = new StreamReader(fileName);
+                    while ((line = fileReader.ReadLine()) != null)
+                    {
+                        fileLines.Add(line);
+                    }
+                    fileReader.Close();
+
+                    newFileLines = converter.ConvertSyntax(fileLines, onlyFileName);
+
+                    File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
                 }
-                fileReader.Close();
-
-                newFileLines = converter.ConvertSyntax(fileLines);
-
-                File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
             }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
 
 
 
