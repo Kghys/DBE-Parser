@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ParsingLib
@@ -12,9 +13,9 @@ namespace ParsingLib
 
         public List<string> ConvertSyntax(List<string> LineToConvert, string blockName)
         {
-            BlockDeclaration(LineToConvert, blockName);
 
-            for (int i = 0; i < LineToConvert.Count(); i++)
+
+            for (int i = 3; i < LineToConvert.Count(); i++)
             {
                 ConvertSigns(LineToConvert, i);
                 LineToConvert[i] = AddVariables(LineToConvert[i]);
@@ -73,22 +74,31 @@ namespace ParsingLib
             }
 
             LineToConvert.Add("END_FUNCTION");
+            BlockDeclaration(LineToConvert, blockName);
             return LineToConvert;
+
         }
 
         private static string AddVariables(string LineToConvert)
         {
             string[] spaceSplit = LineToConvert.Split(' ');
-            
+
             for (int j = 0; j < spaceSplit.Length; j++)
             {
-
-                if (spaceSplit[j].Length == 5 && spaceSplit[j].StartsWith("B") || spaceSplit[j].StartsWith("E") || spaceSplit[j].StartsWith("W") || spaceSplit[j].StartsWith("T") || spaceSplit[j].StartsWith("A") || spaceSplit[j].StartsWith("Z"))
+                if (spaceSplit[j].StartsWith("//"))
+                {
+                    break;
+                }
+                if (spaceSplit[j].StartsWith("EC"))
+                {
+                    spaceSplit[j] = $"{spaceSplit[j]}();";
+                }
+                else if (spaceSplit[j].Length == 5 && Regex.Match(spaceSplit[j], @"\b([A-Z])([0-F])([0-F])([0-F])([0-F])").Success)
                 {
                     spaceSplit[j] = $"\"{spaceSplit[j]}\"";
                 }
 
-                
+
             }
             return string.Join(" ", spaceSplit);
         }
@@ -136,11 +146,11 @@ namespace ParsingLib
 
         private static void ConvertSigns(List<string> LineToConvert, int i)
         {
+            LineToConvert[i] = LineToConvert[i].Replace("/", " NOT ");
             LineToConvert[i] = LineToConvert[i].Replace("(* ", " //");
             LineToConvert[i] = LineToConvert[i].Replace(" OX ", " XOR ");
             LineToConvert[i] = LineToConvert[i].Replace(" . ", " AND ");
             LineToConvert[i] = LineToConvert[i].Replace(" + ", " OR ");
-            LineToConvert[i] = LineToConvert[i].Replace(" / ", " NOT ");
             LineToConvert[i] = LineToConvert[i].Replace("FIN_BLOC_FONCTION", "");
 
         }
