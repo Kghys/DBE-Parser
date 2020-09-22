@@ -12,15 +12,12 @@ namespace ParsingLib
 
         public List<string> ConvertSyntax(List<string> LineToConvert, string blockName)
         {
-            string[] declaration = { "VERSION : 0.1", "BEGIN" };
-            LineToConvert[0] = $"FUNCTION \"{blockName}\" : Void";
-            LineToConvert[1] = "{ S7_Optimized_Acces := 'TRUE'}";
-            LineToConvert.InsertRange(2, declaration);
-
+            BlockDeclaration(LineToConvert, blockName);
 
             for (int i = 0; i < LineToConvert.Count(); i++)
             {
                 ConvertSigns(LineToConvert, i);
+                LineToConvert[i] = AddVariables(LineToConvert[i]);
 
                 if (LineToConvert[i].Contains(" gs "))
                 {
@@ -79,7 +76,32 @@ namespace ParsingLib
             return LineToConvert;
         }
 
-        private static void SwitchSidesAndDeleteOperand(List<string> LineToConvert, int i,string operand)
+        private static string AddVariables(string LineToConvert)
+        {
+            string[] spaceSplit = LineToConvert.Split(' ');
+            
+            for (int j = 0; j < spaceSplit.Length; j++)
+            {
+
+                if (spaceSplit[j].Length == 5 && spaceSplit[j].StartsWith("B") || spaceSplit[j].StartsWith("E") || spaceSplit[j].StartsWith("W") || spaceSplit[j].StartsWith("T") || spaceSplit[j].StartsWith("A") || spaceSplit[j].StartsWith("Z"))
+                {
+                    spaceSplit[j] = $"\"{spaceSplit[j]}\"";
+                }
+
+                
+            }
+            return string.Join(" ", spaceSplit);
+        }
+
+        private static void BlockDeclaration(List<string> LineToConvert, string blockName)
+        {
+            string[] declaration = { "VERSION : 0.1", "BEGIN" };
+            LineToConvert[0] = $"FUNCTION \"{blockName}\" : Void";
+            LineToConvert[1] = "{ S7_Optimized_Acces := 'TRUE'}";
+            LineToConvert.InsertRange(2, declaration);
+        }
+
+        private static void SwitchSidesAndDeleteOperand(List<string> LineToConvert, int i, string operand)
         {
             LineToConvert[i] = LineToConvert[i].Replace($"{operand} ", "");
             if (LineToConvert[i].Contains(" = "))
