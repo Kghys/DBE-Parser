@@ -82,9 +82,6 @@ namespace DBE_Parser
             }
 
 
-
-
-
             lstContent.ItemsSource = newFileLines;
             lstContent.Items.Refresh();
 
