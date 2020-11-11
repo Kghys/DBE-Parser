@@ -1,23 +1,12 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ParsingLib;
 using System.Windows.Forms;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-using System.Windows.Forms.VisualStyles;
+using CsvHelper;
+using OfficeOpenXml;
 
 namespace DBE_Parser
 {
@@ -30,10 +19,11 @@ namespace DBE_Parser
         FolderBrowserDialog fileSavePaths;
         List<string> fileLines = new List<string>();
         List<string> newFileLines = new List<string>();
+        List<string> tagsInProgram = new List<string>();
 
         Analyze Analyzing = new Analyze();
         Converting converter = new Converting();
-
+        TagHelper tagHelper = new TagHelper();
 
         public MainWindow()
         {
@@ -74,16 +64,47 @@ namespace DBE_Parser
 
                     File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
                 }
+
+                WriteExcel(fileSavePaths.SelectedPath);
+
             }
             catch (Exception)
             {
 
-                throw;
+                return;
             }
 
 
             lstContent.ItemsSource = newFileLines;
             lstContent.Items.Refresh();
+
+
+        }
+
+        private void WriteExcel(string path)
+        {
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (ExcelPackage excel = new ExcelPackage())
+            {
+                excel.Workbook.Worksheets.Add("Worksheet1");
+
+                var headerRow = new List<string[]>()
+                            {
+                                new string[] { "Name", "Path", "Data Type", "Logical Address", "Comment", "Hmi Visible", "Hmi Accessible", "Hmi Writeable", "Typeobject ID", "Version ID" }
+                            };
+
+                string headerRange = "A1:" + Char.ConvertFromUtf32(headerRow[0].Length + 64) + "1";
+
+                var worksheet = excel.Workbook.Worksheets["Worksheet1"];
+
+                worksheet.Cells[headerRange].LoadFromArrays(headerRow);
+
+
+                worksheet.Cells[2, 1].LoadFromCollection(tagHelper.TagList);
+                FileInfo excelFile = new FileInfo(path + "/Test.xlsx");
+                excel.SaveAs(excelFile);
+            }
 
 
         }
@@ -105,6 +126,8 @@ namespace DBE_Parser
 
             foreach (string fileName in fileOpenPaths.FileNames)
             {
+
+
                 fileLines.Clear();
                 int counter = 0;
                 string line;
@@ -123,6 +146,7 @@ namespace DBE_Parser
                 lstContent.Items.Refresh();
 
                 Analyzing.CountBoos(fileLines);
+                tagsInProgram = tagHelper.ConvertVariables(fileLines);
 
                 booCount += Analyzing.booCount;
                 trfCount += Analyzing.trfCount;
