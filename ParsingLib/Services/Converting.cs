@@ -58,6 +58,8 @@ namespace ParsingLib
 
                     if (!LineToConvert[i].Contains("THEN")) LineToConvert[i] = LineToConvert[i] + ";";
                 }
+
+
                 if (LineToConvert[i].Contains("log"))
                 {
                     SwitchSidesAndDeleteOperand(LineToConvert, i, "log");
@@ -70,13 +72,48 @@ namespace ParsingLib
 
                     if (!LineToConvert[i].Contains("THEN")) LineToConvert[i] = LineToConvert[i] + ";";
                 }
-
+                // SI ALORS SINON
+                i = HandleIFs(LineToConvert, i);
             }
 
             LineToConvert.Add("END_FUNCTION");
             BlockDeclaration(LineToConvert, blockName);
             return LineToConvert;
 
+        }
+
+        private static int HandleIFs(List<string> LineToConvert, int i)
+        {
+            var index = i;
+            if (LineToConvert[i].Contains("alors"))
+            {
+
+                LineToConvert[i-1] = LineToConvert[i - 1] + LineToConvert[i].Replace("alors", " THEN");
+                LineToConvert.RemoveAt(i);
+                index -= 1;
+            }
+            if (LineToConvert[i].Contains("sinon"))
+            {
+
+                LineToConvert[i] = LineToConvert[i].Replace("sinon", "ELSE");
+                
+            }
+            if (LineToConvert[i].Contains("finsi"))
+            {
+
+                LineToConvert[i] = LineToConvert[i].Replace("finsi", "END_IF;"); 
+                
+            } 
+            if (LineToConvert[i].Contains("si"))
+            {
+
+                LineToConvert[i] = LineToConvert[i].Replace("si", "IF");
+                LineToConvert[i] = LineToConvert[i].Replace("{", "(");
+                LineToConvert[i] = LineToConvert[i].Replace("}", ")");
+                
+            }
+
+            return index;
         }
 
         private static string AddVariables(string LineToConvert)

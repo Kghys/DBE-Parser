@@ -39,6 +39,7 @@ namespace ParsingLib
         {
             string[] spaceSplit = LineToConvert.Split(' ');
 
+
             for (int j = 0; j < spaceSplit.Length; j++)
             {
 
@@ -60,27 +61,48 @@ namespace ParsingLib
         private void MakeTag(string TagName)
         {
             Tag tagToBeAdded;
-            string tagAddress = TagName[1].ToString() + TagName[2].ToString() + TagName[3].ToString();
+            string tagAddress = TagName[1].ToString() + TagName[2].ToString() + TagName[3].ToString() + TagName[4].ToString();
+            string hexValue = tagAddress;
+            var decValue = int.Parse(hexValue, System.Globalization.NumberStyles.HexNumber);
+
+            //switch (TagName[0])
+            //{
+            //    case 'B': tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{tagAddress}.{TagName[4]}" };
+            //        break;
+            //    case 'W':
+            //        tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%MW{tagAddress + TagName[4].ToString()}" };
+            //        break;
+            //    case 'E':
+            //        tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%I{tagAddress}.{TagName[4]}" };
+            //        break;
+            //    case 'A':
+            //        tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%Q{tagAddress}.{TagName[4]}" };
+            //        break;
+            //    default: tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{tagAddress}.{TagName[4]}" };
+
+            //        break;
+            //}
+
 
             switch (TagName[0])
             {
-                case 'B': tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{tagAddress}.{TagName[4]}" };
+                case 'B':
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValue}.{TagName[4]}" };
                     break;
                 case 'W':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%MW{tagAddress + TagName[4].ToString()}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%MW{decValue}" };
                     break;
                 case 'E':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%I{tagAddress}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%I{decValue}.{TagName[4]}" };
                     break;
                 case 'A':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%Q{tagAddress}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%Q{decValue}.{TagName[4]}" };
                     break;
-                default: tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{tagAddress}.{TagName[4]}" };
+                default:
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValue}.{TagName[4]}" };
 
                     break;
             }
-
-
 
             TagList.Add(tagToBeAdded);
 
