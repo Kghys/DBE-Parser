@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using CsvHelper;
 using OfficeOpenXml;
+using ParsingLib.Services;
 
 namespace DBE_Parser
 {
@@ -18,11 +19,14 @@ namespace DBE_Parser
         OpenFileDialog fileOpenPaths;
         FolderBrowserDialog fileSavePaths;
         List<string> fileLines = new List<string>();
+        List<string> giantFile = new List<string>();
         List<string> newFileLines = new List<string>();
         List<string> tagsInProgram = new List<string>();
 
         Analyze Analyzing = new Analyze();
         Converting converter = new Converting();
+        //in testing
+        Converter testConverting = new Converter();
         TagHelper tagHelper = new TagHelper();
 
         public MainWindow()
@@ -42,7 +46,20 @@ namespace DBE_Parser
         private void BtnConvertFile_Click(object sender, RoutedEventArgs e)
         {
             fileSavePaths = new FolderBrowserDialog();
+            fileSavePaths.SelectedPath = Path.GetDirectoryName(fileOpenPaths.FileNames[0].ToString());
             DialogResult result = fileSavePaths.ShowDialog();
+            txtConverted.Clear();
+            int booCount = 0;
+            int logCount = 0;
+            int trfCount = 0;
+            int tbwCount = 0;
+            int finValCount = 0;
+            int traCount = 0;
+            int siCount = 0;
+            int siNonCount = 0;
+            int calCount = 0;
+            int commentCount = 0;
+            int totalLines = 0;
 
             Console.WriteLine(fileSavePaths.SelectedPath);
             try
@@ -59,13 +76,40 @@ namespace DBE_Parser
                         fileLines.Add(line);
                     }
                     fileReader.Close();
+                    newFileLines = testConverting.Convert(fileLines,onlyFileName);
 
-                    newFileLines = converter.ConvertSyntax(fileLines, onlyFileName);
+                    //analyze converted syntaxes
+                    Analyzing.CountBoos(newFileLines);
+                    booCount += Analyzing.booCount;
+                    trfCount += Analyzing.trfCount;
+                    logCount += Analyzing.logCount;
+                    tbwCount += Analyzing.tbwCount;
+                    finValCount += Analyzing.finValCount;
+                    traCount += Analyzing.traCount;
+                    siCount += Analyzing.siCount;
+                    siNonCount += Analyzing.siNonCount;
+                    calCount += Analyzing.calCount;
+                    commentCount += Analyzing.commentCount;
 
                     File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
                 }
 
+                File.WriteAllLines(fileSavePaths.SelectedPath + "/BigProgram.scl", giantFile);
+                // alles in 1 file gieten
                 WriteExcel(fileSavePaths.SelectedPath);
+
+
+                txtConverted.Text += $"\n Totale BOO's :  {booCount}";
+                txtConverted.Text += $"\n Totale TRF's :  {trfCount}";
+                txtConverted.Text += $"\n Totale LOG's :  {logCount}";
+                txtConverted.Text += $"\n Totale TBW's :  {tbwCount}";
+                txtConverted.Text += $"\n Totale FINVAL's :  {finValCount}";
+                txtConverted.Text += $"\n Totale TRA's :  {traCount}";
+                txtConverted.Text += $"\n Totale SI's :  {siCount}";
+                txtConverted.Text += $"\n Totale SINON's :  {siNonCount}";
+                txtConverted.Text += $"\n Totale CAL's :  {calCount}";
+                txtConverted.Text += $"\n Totale Comments's :  {commentCount}";
+                txtConverted.Text += $"\n Totale Lijnen :  {totalLines}";
 
             }
             catch (Exception)
@@ -73,10 +117,6 @@ namespace DBE_Parser
 
                 return;
             }
-
-
-            lstContent.ItemsSource = newFileLines;
-            lstContent.Items.Refresh();
 
 
         }
@@ -87,7 +127,7 @@ namespace DBE_Parser
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (ExcelPackage excel = new ExcelPackage())
             {
-                excel.Workbook.Worksheets.Add("Worksheet1");
+                excel.Workbook.Worksheets.Add("PLC Tags");
 
                 var headerRow = new List<string[]>()
                             {
@@ -96,7 +136,7 @@ namespace DBE_Parser
 
                 string headerRange = "A1:" + Char.ConvertFromUtf32(headerRow[0].Length + 64) + "1";
 
-                var worksheet = excel.Workbook.Worksheets["Worksheet1"];
+                var worksheet = excel.Workbook.Worksheets["PLC Tags"];
 
                 worksheet.Cells[headerRange].LoadFromArrays(headerRow);
 
@@ -121,7 +161,9 @@ namespace DBE_Parser
             int siNonCount = 0;
             int calCount = 0;
             int commentCount = 0;
-
+            int totalLines = 0;
+            //grote file clearen
+            giantFile.Clear();
             txtEditor.Clear();
 
             foreach (string fileName in fileOpenPaths.FileNames)
@@ -134,16 +176,16 @@ namespace DBE_Parser
                 StreamReader fileReader = new StreamReader(fileName);
                 while ((line = fileReader.ReadLine()) != null)
                 {
-                    System.Console.WriteLine(line);
                     counter++;
                     fileLines.Add(line);
+                    //de lijn ook in de grote file steken.
+                    giantFile.Add(line);
+                    totalLines += 1;
 
                 }
 
                 fileReader.Close();
                 Console.WriteLine("There were {0} lines.", counter);
-                lstContent.ItemsSource = fileLines;
-                lstContent.Items.Refresh();
 
                 Analyzing.CountBoos(fileLines);
                 tagsInProgram = tagHelper.ConvertVariables(fileLines);
@@ -169,6 +211,7 @@ namespace DBE_Parser
             txtEditor.Text += $"\n Totale SINON's :  {siNonCount}";
             txtEditor.Text += $"\n Totale CAL's :  {calCount}";
             txtEditor.Text += $"\n Totale Comments's :  {commentCount}";
+            txtEditor.Text += $"\n Totale Lijnen :  {totalLines}";
         }
 
 

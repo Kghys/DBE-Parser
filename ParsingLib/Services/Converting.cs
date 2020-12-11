@@ -11,26 +11,32 @@ namespace ParsingLib
     {
 
 
-        public List<string> ConvertSyntax(List<string> LineToConvert, string blockName)
+        public List<string> ConvertSyntax(List<string> Lines, string blockName)
         {
 
 
-            for (int i = 3; i < LineToConvert.Count(); i++)
-            {
-                ConvertSigns(LineToConvert, i);
-                LineToConvert[i] = AddVariables(LineToConvert[i]);
 
-                if (LineToConvert[i].Contains(" gs "))
+
+            
+            var LinesToConvert = MasterRelayHandler(Lines);
+
+            for (int i = 3; i < LinesToConvert.Count(); i++)
+            {
+                ConvertSigns(LinesToConvert, i);
+                LinesToConvert[i] = AddVariables(LinesToConvert[i]);
+
+
+                if (LinesToConvert[i].Contains(" gs "))
                 {
                     try
                     {
-                        if (LineToConvert[i].Contains("boo"))
+                        if (LinesToConvert[i].Contains("boo"))
                         {
-                            LineToConvert[i] = LineToConvert[i].Replace("boo ", "");
+                            LinesToConvert[i] = LinesToConvert[i].Replace("boo ", "");
                         }
-                        List<string> toBeInserted = GsHandle(LineToConvert, i);
-                        LineToConvert.InsertRange(i, toBeInserted);
-                        LineToConvert.RemoveAt(i + toBeInserted.Count());
+                        List<string> toBeInserted = GsHandle(LinesToConvert, i);
+                        LinesToConvert.InsertRange(i, toBeInserted);
+                        LinesToConvert.RemoveAt(i + toBeInserted.Count());
                     }
                     catch (Exception)
                     {
@@ -41,44 +47,107 @@ namespace ParsingLib
 
                 }
 
-                if (LineToConvert[i].Contains("= val"))
+                if (LinesToConvert[i].Contains("= val"))
                 {
 
-                    LineToConvert[i] = LineToConvert[i].Replace("boo", "IF(");
-                    LineToConvert[i] = LineToConvert[i].Replace("= val", ") THEN");
+                    LinesToConvert[i] = LinesToConvert[i].Replace("boo", "IF(");
+                    LinesToConvert[i] = LinesToConvert[i].Replace("= val", ") THEN");
 
                 }
-                if (LineToConvert[i].Contains("finval"))
+                if (LinesToConvert[i].Contains("finval"))
                 {
-                    LineToConvert[i] = LineToConvert[i].Replace("finval", "END_IF;");
+                    LinesToConvert[i] = LinesToConvert[i].Replace("finval", "END_IF;");
                 }
-                if (LineToConvert[i].Contains("boo"))
+                if (LinesToConvert[i].Contains("boo"))
                 {
-                    SwitchSidesAndDeleteOperand(LineToConvert, i, "boo");
+                    SwitchSidesAndDeleteOperand(LinesToConvert, i, "boo");
 
-                    if (!LineToConvert[i].Contains("THEN")) LineToConvert[i] = LineToConvert[i] + ";";
+                    if (!LinesToConvert[i].Contains("THEN")) LinesToConvert[i] = LinesToConvert[i] + ";";
                 }
 
 
-                if (LineToConvert[i].Contains("log"))
+                if (LinesToConvert[i].Contains("log"))
                 {
-                    SwitchSidesAndDeleteOperand(LineToConvert, i, "log");
+                    SwitchSidesAndDeleteOperand(LinesToConvert, i, "log");
 
-                    if (!LineToConvert[i].Contains("THEN")) LineToConvert[i] = LineToConvert[i] + ";";
+                    if (!LinesToConvert[i].Contains("THEN")) LinesToConvert[i] = LinesToConvert[i] + ";";
                 }
-                if (LineToConvert[i].Contains("cal"))
+                if (LinesToConvert[i].Contains("cal"))
                 {
-                    SwitchSidesAndDeleteOperand(LineToConvert, i, "cal");
+                    SwitchSidesAndDeleteOperand(LinesToConvert, i, "cal");
 
-                    if (!LineToConvert[i].Contains("THEN")) LineToConvert[i] = LineToConvert[i] + ";";
+                    if (!LinesToConvert[i].Contains("THEN")) LinesToConvert[i] = LinesToConvert[i] + ";";
                 }
                 // SI ALORS SINON
-                i = HandleIFs(LineToConvert, i);
+                i = HandleIFs(LinesToConvert, i);
             }
 
-            LineToConvert.Add("END_FUNCTION");
-            BlockDeclaration(LineToConvert, blockName);
-            return LineToConvert;
+            LinesToConvert.Add("END_FUNCTION");
+            BlockDeclaration(LinesToConvert, blockName);
+
+            return LinesToConvert;
+
+
+        }
+
+        private static List<string> MasterRelayHandler(List<string> ProgramLines)
+        {
+            int startLocation = 0;
+            int stopLocation = 0;
+            List<string> returnList;
+            foreach (var line in ProgramLines.ToList())
+            {
+                //Begin van de MR lus
+                if (line.Contains("=") && line.Contains("mr"))
+                {
+                    startLocation = ProgramLines.IndexOf(line);
+
+                    ProgramLines[startLocation] = line.Replace(" = mr", " @  mr");
+                    string[] equalString = ProgramLines[startLocation].Split('@');
+                    ProgramLines[startLocation] = ($"IF({equalString[0]}) THEN (*START OF MasterRelay");
+                    List<string> tagsToBeReset = new List<string>();
+
+                    for (int i = startLocation; i < ProgramLines.Count(); i++)
+                    {
+                        if (ProgramLines[i].Contains("gs"))
+                        {
+                            if (ProgramLines[i].Contains("boo"))
+                            {
+                                ProgramLines[i] = ProgramLines[i].Replace("boo ", "");
+                            }
+
+                            List<string> toBeInserted = GsHandle(ProgramLines, i);
+                            ProgramLines.InsertRange(i, toBeInserted);
+                            ProgramLines.RemoveAt(i + toBeInserted.Count());
+
+                            foreach (string insertedLine in toBeInserted)
+                            {
+                                if (insertedLine.Contains(":="))
+                                {
+                                    insertedLine.Replace(":=", ":");
+                                    string[] splitString = insertedLine.Split(':');
+                                    tagsToBeReset.Add($"{splitString[0].Trim()} := 0");
+                                }
+                            }
+
+
+                            i += toBeInserted.Count() -1; 
+                        }
+                        if (ProgramLines[i].Contains("finmr"))
+                        {
+                            stopLocation = i;
+                            ProgramLines[stopLocation] = ($"ELSE");
+                            ProgramLines.Insert(stopLocation + 1,($"(*ADD GS_CODE_RESETTING"));
+                            ProgramLines.InsertRange(stopLocation + 2, tagsToBeReset);
+                            ProgramLines.Insert(stopLocation + 2 + tagsToBeReset.Count(), ($"END_IF; (*END OF MasterRelay"));
+                            break;
+                        }
+                    }
+
+                }
+            }
+            returnList = ProgramLines;
+            return returnList;
 
         }
 
@@ -88,7 +157,7 @@ namespace ParsingLib
             if (LineToConvert[i].Contains("alors"))
             {
 
-                LineToConvert[i-1] = LineToConvert[i - 1] + LineToConvert[i].Replace("alors", " THEN");
+                LineToConvert[i - 1] = LineToConvert[i - 1] + LineToConvert[i].Replace("alors", " THEN");
                 LineToConvert.RemoveAt(i);
                 index -= 1;
             }
@@ -96,21 +165,21 @@ namespace ParsingLib
             {
 
                 LineToConvert[i] = LineToConvert[i].Replace("sinon", "ELSE");
-                
+
             }
             if (LineToConvert[i].Contains("finsi"))
             {
 
-                LineToConvert[i] = LineToConvert[i].Replace("finsi", "END_IF;"); 
-                
-            } 
+                LineToConvert[i] = LineToConvert[i].Replace("finsi", "END_IF;");
+
+            }
             if (LineToConvert[i].Contains("si"))
             {
 
                 LineToConvert[i] = LineToConvert[i].Replace("si", "IF");
                 LineToConvert[i] = LineToConvert[i].Replace("{", "(");
                 LineToConvert[i] = LineToConvert[i].Replace("}", ")");
-                
+
             }
 
             return index;
@@ -166,6 +235,7 @@ namespace ParsingLib
 
         private static List<string> GsHandle(List<string> LineToConvert, int i)
         {
+            //GS = voorwaarden voldaan + eerste bool na de GS is 1 => tweede bool op 1 en eerste bool resetten.
             List<string> insertingGs = new List<string>();
             LineToConvert[i] = LineToConvert[i].Replace(" = gs", " @  gs");
             string[] equalString = LineToConvert[i].Split('@');
@@ -185,6 +255,7 @@ namespace ParsingLib
         {
             LineToConvert[i] = LineToConvert[i].Replace("/", " NOT ");
             LineToConvert[i] = LineToConvert[i].Replace("(* ", " //");
+            LineToConvert[i] = LineToConvert[i].Replace("(*", "//");
             LineToConvert[i] = LineToConvert[i].Replace(" OX ", " XOR ");
             LineToConvert[i] = LineToConvert[i].Replace(" . ", " AND ");
             LineToConvert[i] = LineToConvert[i].Replace(" + ", " OR ");

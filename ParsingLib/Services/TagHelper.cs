@@ -61,45 +61,46 @@ namespace ParsingLib
         private void MakeTag(string TagName)
         {
             Tag tagToBeAdded;
-            string tagAddress = TagName[1].ToString() + TagName[2].ToString() + TagName[3].ToString() + TagName[4].ToString();
-            string hexValue = tagAddress;
-            var decValue = int.Parse(hexValue, System.Globalization.NumberStyles.HexNumber);
-
-            //switch (TagName[0])
-            //{
-            //    case 'B': tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{tagAddress}.{TagName[4]}" };
-            //        break;
-            //    case 'W':
-            //        tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%MW{tagAddress + TagName[4].ToString()}" };
-            //        break;
-            //    case 'E':
-            //        tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%I{tagAddress}.{TagName[4]}" };
-            //        break;
-            //    case 'A':
-            //        tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%Q{tagAddress}.{TagName[4]}" };
-            //        break;
-            //    default: tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{tagAddress}.{TagName[4]}" };
-
-            //        break;
-            //}
-
+            string wordAddress = TagName[1].ToString() + TagName[2].ToString() + TagName[3].ToString() + TagName[4].ToString();
+            string boolAddress = TagName[1].ToString() + TagName[2].ToString() + TagName[3].ToString();
+            
+            var decValueWord = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
+            var decValueBool = int.Parse(boolAddress, System.Globalization.NumberStyles.HexNumber);
 
             switch (TagName[0])
             {
                 case 'B':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValue}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValueBool}.{TagName[4]}" };
                     break;
                 case 'W':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%MW{decValue}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "Word", LogicalAddress = $"%MW{decValueWord}" };
+                    break;
+                case 'J':
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "Byte", LogicalAddress = $"%MB{decValueWord}" };
+                    break;
+                case 'H':
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "Byte", LogicalAddress = $"%MB{decValueWord +1 }" };
+                    break;
+                case 'D':
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "Dint", LogicalAddress = $"%MW{decValueWord}" };
+                    break;
+                case 'F':
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "Word", LogicalAddress = $"%MW{decValueWord}" };
+                    break;
+                case 'V':
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "Word", LogicalAddress = $"%MW{decValueWord}" };
                     break;
                 case 'E':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%I{decValue}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%I{decValueBool}.{TagName[4]}" };
                     break;
                 case 'A':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%Q{decValue}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%Q{decValueBool}.{TagName[4]}" };
+                    break;
+                case 'P':
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "byte", LogicalAddress = $"%MB{decValueWord}" };
                     break;
                 default:
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValue}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValueBool}.{TagName[4]}" };
 
                     break;
             }

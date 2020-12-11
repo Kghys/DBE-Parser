@@ -36,6 +36,11 @@ namespace ParsingLib
             commentCount = 0;
             for (int i = 0; i < LineToAnalyze.Count(); i++)
             {
+                if (LineToAnalyze[i].Contains("//"))
+                {
+                    return;
+                }
+
                 if (LineToAnalyze[i].Contains("si") && LineToAnalyze[i+1].Contains("alors"))
                 {
                     siCount++;
@@ -44,15 +49,15 @@ namespace ParsingLib
                 {
                     siNonCount++;
                 }
-                if (LineToAnalyze[i].Contains("boo"))
+                if (LineToAnalyze[i].Contains("boo "))
                 {
                     booCount++;
                 }
-                if (LineToAnalyze[i].Contains("trf"))
+                if (LineToAnalyze[i].Contains("trf "))
                 {
                     trfCount++;
                 }
-                if (LineToAnalyze[i].Contains("log"))
+                if (LineToAnalyze[i].Contains("log "))
                 {
                     logCount++;
                 }
@@ -68,11 +73,11 @@ namespace ParsingLib
                 {
                     finValCount++;
                 }
-                if (LineToAnalyze[i].Contains("tra"))
+                if (LineToAnalyze[i].Contains("tra "))
                 {
                     traCount++;
                 }
-                if (LineToAnalyze[i].Contains("cal"))
+                if (LineToAnalyze[i].Contains("cal "))
                 {
                     calCount++;
                 }
