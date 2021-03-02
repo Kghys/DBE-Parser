@@ -20,68 +20,119 @@ namespace ParsingLib
         public int siNonCount { get; set; }
         public int calCount { get; set; }
 
+        public List<int> CountedOperand { get; set; }
 
-
-        public void CountBoos(List<string> LineToAnalyze)
+        public Analyze()
         {
-            booCount = 0;
-            logCount = 0;
-            trfCount = 0;
-            tbwCount = 0;
-            finValCount = 0;
-            traCount = 0;
-            siCount = 0;
-            siNonCount = 0;
-            calCount = 0;
-            commentCount = 0;
+            CountedOperand = new List<int>();
+        }
+
+        public List<int> CountBoos(List<string> LineToAnalyze, List<string> Operands)
+        {
+
+
+            foreach (var operand in Operands)
+            {
+                CountedOperand.Add(0);
+            }
+
+
             for (int i = 0; i < LineToAnalyze.Count(); i++)
             {
+
+
                 if (LineToAnalyze[i].Contains("//"))
                 {
-                    return;
+                    continue;
+                }
+                if (LineToAnalyze[i].Trim() != "")
+                {
+                    var splitLine = LineToAnalyze[i].Split(' ');
+
+
+                    for (int s = 0; s < splitLine.Count(); s++)
+                    {
+
+                        for (int o = 0; o < Operands.Count(); o++)
+                        {
+
+                            if (splitLine[s] == Operands[o])
+                            {
+
+                                CountedOperand[o] += 1;
+
+                            }
+
+
+                        }
+                    }
                 }
 
-                if (LineToAnalyze[i].Contains("si") && LineToAnalyze[i+1].Contains("alors"))
-                {
-                    siCount++;
-                }
-                if (LineToAnalyze[i].Contains("sinon"))
-                {
-                    siNonCount++;
-                }
-                if (LineToAnalyze[i].Contains("boo "))
-                {
-                    booCount++;
-                }
-                if (LineToAnalyze[i].Contains("trf "))
-                {
-                    trfCount++;
-                }
-                if (LineToAnalyze[i].Contains("log "))
-                {
-                    logCount++;
-                }
-                if (LineToAnalyze[i].Contains("(*"))
-                {
-                    commentCount++;
-                }
-                if (LineToAnalyze[i].Contains("tbw"))
-                {
-                    tbwCount++;
-                }
-                if (LineToAnalyze[i].Contains("finval"))
-                {
-                    finValCount++;
-                }
-                if (LineToAnalyze[i].Contains("tra "))
-                {
-                    traCount++;
-                }
-                if (LineToAnalyze[i].Contains("cal "))
-                {
-                    calCount++;
-                }
+
             }
+
+            return CountedOperand;
+
+
+
+            //booCount = 0;
+            //logCount = 0;
+            //trfCount = 0;
+            //tbwCount = 0;
+            //finValCount = 0;
+            //traCount = 0;
+            //siCount = 0;
+            //siNonCount = 0;
+            //calCount = 0;
+            //commentCount = 0;
+            //for (int i = 0; i < LineToAnalyze.Count(); i++)
+            //{
+            //    if (LineToAnalyze[i].Contains("//"))
+            //    {
+            //        return;
+            //    }
+
+            //    if (LineToAnalyze[i].Contains("si") && LineToAnalyze[i+1].Contains("alors"))
+            //    {
+            //        siCount++;
+            //    }
+            //    if (LineToAnalyze[i].Contains("sinon"))
+            //    {
+            //        siNonCount++;
+            //    }
+            //    if (LineToAnalyze[i].Contains("boo "))
+            //    {
+            //        booCount++;
+            //    }
+            //    if (LineToAnalyze[i].Contains("trf "))
+            //    {
+            //        trfCount++;
+            //    }
+            //    if (LineToAnalyze[i].Contains("log "))
+            //    {
+            //        logCount++;
+            //    }
+            //    if (LineToAnalyze[i].Contains("(*"))
+            //    {
+            //        commentCount++;
+            //    }
+            //    if (LineToAnalyze[i].Contains("tbw"))
+            //    {
+            //        tbwCount++;
+            //    }
+            //    if (LineToAnalyze[i].Contains("finval"))
+            //    {
+            //        finValCount++;
+            //    }
+            //    if (LineToAnalyze[i].Contains("tra "))
+            //    {
+            //        traCount++;
+            //    }
+            //    if (LineToAnalyze[i].Contains("cal "))
+            //    {
+            //        calCount++;
+            //    }
+            //}
             Console.WriteLine($"er waren {booCount} BOO's");
             Console.WriteLine($"er waren {logCount} LOG's");
             Console.WriteLine($"er waren {trfCount} TRF's");

@@ -14,12 +14,14 @@ namespace ParsingLib
 
         public List<String> Variables { get; set; }
         public List<Tag> TagList { get; set; }
+        public List<String> Operands { get; set; }
 
 
         public TagHelper()
         {
             Variables = new List<string>();
             TagList = new List<Tag>();
+            Operands = new List<string>();
         }
 
         public List<String> ConvertVariables(List<string> LinesToConvert)
@@ -37,6 +39,10 @@ namespace ParsingLib
 
         private void AddVariables(string LineToConvert)
         {
+            if (LineToConvert.Contains("(*"))
+            {
+                return;
+            }
             string[] spaceSplit = LineToConvert.Split(' ');
 
 
@@ -52,6 +58,17 @@ namespace ParsingLib
                     }
 
                 }
+                else if (spaceSplit[j].Count() >= 2 && Regex.Match(spaceSplit[j], @"^[a-zA-Z]+$").Success)
+                {
+                    if (!Operands.Contains(spaceSplit[j].Trim().ToLower()))
+                    {
+
+                        Operands.Add(spaceSplit[j].Trim().ToLower());
+
+                    }
+
+
+                }
 
 
             }
@@ -63,7 +80,7 @@ namespace ParsingLib
             Tag tagToBeAdded;
             string wordAddress = TagName[1].ToString() + TagName[2].ToString() + TagName[3].ToString() + TagName[4].ToString();
             string boolAddress = TagName[1].ToString() + TagName[2].ToString() + TagName[3].ToString();
-            
+
             var decValueWord = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
             var decValueBool = int.Parse(boolAddress, System.Globalization.NumberStyles.HexNumber);
 
@@ -79,7 +96,7 @@ namespace ParsingLib
                     tagToBeAdded = new Tag { Name = TagName, DataType = "Byte", LogicalAddress = $"%MB{decValueWord}" };
                     break;
                 case 'H':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "Byte", LogicalAddress = $"%MB{decValueWord +1 }" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "Byte", LogicalAddress = $"%MB{decValueWord + 1 }" };
                     break;
                 case 'D':
                     tagToBeAdded = new Tag { Name = TagName, DataType = "Dint", LogicalAddress = $"%MW{decValueWord}" };
@@ -100,12 +117,15 @@ namespace ParsingLib
                     tagToBeAdded = new Tag { Name = TagName, DataType = "byte", LogicalAddress = $"%MB{decValueWord}" };
                     break;
                 default:
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValueBool}.{TagName[4]}" };
-
+                    tagToBeAdded = null;
                     break;
             }
 
-            TagList.Add(tagToBeAdded);
+            if (tagToBeAdded != null)
+            {
+
+                TagList.Add(tagToBeAdded);
+            }
 
         }
 

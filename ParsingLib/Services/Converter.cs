@@ -65,13 +65,22 @@ namespace ParsingLib.Services
             if (programLine.Contains("fd ")) { HandleFd(index); return newIndex; }
             if (programLine.Contains("jmp ")) { HandleJmp(index); return newIndex; }
             if (programLine.Contains("label ")) { HandleLabel(index); return newIndex; }
-            //if (programLine.Contains("alors")) { HandleAlors(index); return newIndex; }
+            if (programLine.Contains("alors")) { return newIndex; }
             if (programLine.Contains("sinon")) { HandleSinon(index); return newIndex; }
             if (programLine.Contains("finsi")) { HandleFinsi(index); return newIndex; }
             if (programLine.Contains("trf ")) { HandleTrf(index); return newIndex; }
             if (programLine.Contains(" set")) { HandleSet(index); return newIndex; }
             if (programLine.Contains(" reset")) { HandleReset(index); return newIndex; }
             if (programLine.Contains("boo ")) { HandleBoo(index); return newIndex; }
+            if (programLine.Contains("FIN")) { return newIndex; }
+            if (programLine.Contains("BLOC")) { return newIndex; }
+            if (programLine.Contains("VAR")) { return newIndex; }
+            if (programLine.Contains("PROGRAMME")) { return newIndex; }
+
+
+            ConvertedProgram.Add($"{ProgramToConvert[index]}");
+                ConvertedProgram.Add($"//No translation found");
+
 
 
             // default implementeren, unknown
@@ -362,7 +371,7 @@ namespace ParsingLib.Services
             if (line.Contains("btd"))
             {
                 // THIS IS A BINAIRY TO DECIMAL ENCODING
-                var splitLine = line.Replace("dtb", "@").Split('@');
+                var splitLine = line.Replace("btd", "@").Split('@');
 
                 line = $"{splitLine[1].Trim()} := BCD16_TO_INT( {splitLine[0].Trim()});";
             }

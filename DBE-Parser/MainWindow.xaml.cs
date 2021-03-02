@@ -8,6 +8,7 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using CsvHelper;
 using OfficeOpenXml;
 using ParsingLib.Services;
+using System.Linq;
 
 namespace DBE_Parser
 {
@@ -22,6 +23,8 @@ namespace DBE_Parser
         List<string> giantFile = new List<string>();
         List<string> newFileLines = new List<string>();
         List<string> tagsInProgram = new List<string>();
+        List<string> operandsInProgram = new List<string>();
+        List<int> operandsCounted = new List<int>();
 
         Analyze Analyzing = new Analyze();
         Converting converter = new Converting();
@@ -49,17 +52,8 @@ namespace DBE_Parser
             fileSavePaths.SelectedPath = Path.GetDirectoryName(fileOpenPaths.FileNames[0].ToString());
             DialogResult result = fileSavePaths.ShowDialog();
             txtConverted.Clear();
-            int booCount = 0;
-            int logCount = 0;
-            int trfCount = 0;
-            int tbwCount = 0;
-            int finValCount = 0;
-            int traCount = 0;
-            int siCount = 0;
-            int siNonCount = 0;
-            int calCount = 0;
-            int commentCount = 0;
-            int totalLines = 0;
+
+            Analyzing = new Analyze();
 
             Console.WriteLine(fileSavePaths.SelectedPath);
             try
@@ -79,17 +73,7 @@ namespace DBE_Parser
                     newFileLines = testConverting.Convert(fileLines,onlyFileName);
 
                     //analyze converted syntaxes
-                    Analyzing.CountBoos(newFileLines);
-                    booCount += Analyzing.booCount;
-                    trfCount += Analyzing.trfCount;
-                    logCount += Analyzing.logCount;
-                    tbwCount += Analyzing.tbwCount;
-                    finValCount += Analyzing.finValCount;
-                    traCount += Analyzing.traCount;
-                    siCount += Analyzing.siCount;
-                    siNonCount += Analyzing.siNonCount;
-                    calCount += Analyzing.calCount;
-                    commentCount += Analyzing.commentCount;
+                    operandsCounted = Analyzing.CountBoos(newFileLines, operandsInProgram);
 
                     File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
                 }
@@ -98,18 +82,13 @@ namespace DBE_Parser
                 // alles in 1 file gieten
                 WriteExcel(fileSavePaths.SelectedPath);
 
+                for (int i = 0; i < operandsInProgram.Count(); i++)
+                {
 
-                txtConverted.Text += $"\n Totale BOO's :  {booCount}";
-                txtConverted.Text += $"\n Totale TRF's :  {trfCount}";
-                txtConverted.Text += $"\n Totale LOG's :  {logCount}";
-                txtConverted.Text += $"\n Totale TBW's :  {tbwCount}";
-                txtConverted.Text += $"\n Totale FINVAL's :  {finValCount}";
-                txtConverted.Text += $"\n Totale TRA's :  {traCount}";
-                txtConverted.Text += $"\n Totale SI's :  {siCount}";
-                txtConverted.Text += $"\n Totale SINON's :  {siNonCount}";
-                txtConverted.Text += $"\n Totale CAL's :  {calCount}";
-                txtConverted.Text += $"\n Totale Comments's :  {commentCount}";
-                txtConverted.Text += $"\n Totale Lijnen :  {totalLines}";
+                    txtConverted.AppendText($"{operandsInProgram[i]} count : {operandsCounted[i]}\n");
+
+                }
+
 
             }
             catch (Exception)
@@ -151,20 +130,13 @@ namespace DBE_Parser
 
         private void BtnAnalyzeFile_Click(object sender, RoutedEventArgs e)
         {
-            int booCount = 0;
-            int logCount = 0;
-            int trfCount = 0;
-            int tbwCount = 0;
-            int finValCount = 0;
-            int traCount = 0;
-            int siCount = 0;
-            int siNonCount = 0;
-            int calCount = 0;
-            int commentCount = 0;
             int totalLines = 0;
             //grote file clearen
             giantFile.Clear();
             txtEditor.Clear();
+            operandsInProgram = new List<string>();
+            tagHelper = new TagHelper();
+            Analyzing = new Analyze();
 
             foreach (string fileName in fileOpenPaths.FileNames)
             {
@@ -187,31 +159,20 @@ namespace DBE_Parser
                 fileReader.Close();
                 Console.WriteLine("There were {0} lines.", counter);
 
-                Analyzing.CountBoos(fileLines);
                 tagsInProgram = tagHelper.ConvertVariables(fileLines);
+                operandsInProgram = tagHelper.Operands;
 
-                booCount += Analyzing.booCount;
-                trfCount += Analyzing.trfCount;
-                logCount += Analyzing.logCount;
-                tbwCount += Analyzing.tbwCount;
-                finValCount += Analyzing.finValCount;
-                traCount += Analyzing.traCount;
-                siCount += Analyzing.siCount;
-                siNonCount += Analyzing.siNonCount;
-                calCount += Analyzing.calCount;
-                commentCount += Analyzing.commentCount;
+                operandsCounted = Analyzing.CountBoos(fileLines, operandsInProgram);
+
             }
-            txtEditor.Text += $"\n Totale BOO's :  {booCount}";
-            txtEditor.Text += $"\n Totale TRF's :  {trfCount}";
-            txtEditor.Text += $"\n Totale LOG's :  {logCount}";
-            txtEditor.Text += $"\n Totale TBW's :  {tbwCount}";
-            txtEditor.Text += $"\n Totale FINVAL's :  {finValCount}";
-            txtEditor.Text += $"\n Totale TRA's :  {traCount}";
-            txtEditor.Text += $"\n Totale SI's :  {siCount}";
-            txtEditor.Text += $"\n Totale SINON's :  {siNonCount}";
-            txtEditor.Text += $"\n Totale CAL's :  {calCount}";
-            txtEditor.Text += $"\n Totale Comments's :  {commentCount}";
-            txtEditor.Text += $"\n Totale Lijnen :  {totalLines}";
+
+            for (int i = 0; i < operandsInProgram.Count(); i++)
+            {
+
+                txtEditor.AppendText($"{operandsInProgram[i]} count : {operandsCounted[i]}\n");
+
+            }
+
         }
 
 
