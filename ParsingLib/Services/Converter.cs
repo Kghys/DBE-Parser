@@ -52,6 +52,8 @@ namespace ParsingLib.Services
             ConvertedProgram.Add($"");
             ConvertedProgram.Add($"// {ProgramToConvert[index]}");
             if (programLine.Contains("(*")) { ConvertedProgram.Add(ProgramToConvert[index].Replace("(*", "//")); return newIndex; }
+            //REGEX: Kijk of er iets inzit dan lijkt op het volgende: TXXX_XXXX (zoals T16_W0104)
+            if (Regex.IsMatch(programLine, @"(T[0-9]*[0-9]*[0-9]_[A-Z][0-9][0-9A-Z][0-9A-Z][0-9A-Z])")) { HandleTUnderscore(index); return newIndex; }
             if (programLine.Contains("= mr")) { newIndex = HandleMr(index); return newIndex; }
             if (programLine.Contains("gs ")) { HandleGS(index); return newIndex; }
             if (programLine.Contains("val")) { HandleVal(index); return newIndex; }
@@ -61,6 +63,12 @@ namespace ParsingLib.Services
             if (programLine.Contains("si ")) { HandleSi(index); return newIndex; }
             if (programLine.Contains("tbw ")) { HandleTbw(index); return newIndex; }
             if (programLine.Contains("twb ")) { HandleTwb(index); return newIndex; }
+            if (programLine.Contains("ded ")) { HandleDed(index); return newIndex; }
+            if (programLine.Contains("deg ")) { HandleDeg(index); return newIndex; }
+            if (programLine.Contains("cas_de ")) { HandleCas(index); return newIndex; }
+            if (programLine.Contains("quand ")) { HandleQuand(index); return newIndex; }
+            if (programLine.Contains("autres")) { HandleAutres(index); return newIndex; }
+            if (programLine.Contains("fincas")) { HandleFincas(index); return newIndex; }
             if (programLine.Contains("fm ")) { HandleFm(index); return newIndex; }
             if (programLine.Contains("fd ")) { HandleFd(index); return newIndex; }
             if (programLine.Contains("jmp ")) { HandleJmp(index); return newIndex; }
@@ -79,12 +87,17 @@ namespace ParsingLib.Services
 
 
             ConvertedProgram.Add($"{ProgramToConvert[index]}");
-                ConvertedProgram.Add($"//No translation found");
+            ConvertedProgram.Add($"//No translation found");
 
 
 
             // default implementeren, unknown
             return newIndex;
+        }
+
+        private void HandleTUnderscore(int index)
+        {
+            //enal
         }
 
         private int HandleMr(int index)
@@ -245,6 +258,60 @@ namespace ParsingLib.Services
 
         }
 
+        private void HandleDeg(int index)
+        {
+            //  "W012A" := SHL(IN:= "W012A", N:= 1);: 
+            //  deg W0164 , 16#C = W0164
+            var replacedString = ProgramToConvert[index].Replace(" = ", " @  ");
+            replacedString = replacedString.Replace("deg", "");
+            string[] equalString = replacedString.Split('@');
+            string[] commaSplit = equalString[0].Split(',');
+            ConvertedProgram.Add($"{equalString[1]} := SHL(IN:= {commaSplit[0]}, N:= {commaSplit[1]});");
+
+        }
+
+        private void HandleDed(int index)
+        {
+            //  "W012A" := SHR(IN:= "W012A", N:= 1);:  
+            //  ded W0164 , 16#C = W0164
+            var replacedString = ProgramToConvert[index].Replace(" = ", " @  ");
+            replacedString = replacedString.Replace("ded", "");
+            string[] equalString = replacedString.Split('@');
+            string[] commaSplit = equalString[0].Split(',');
+            ConvertedProgram.Add($"{equalString[1]} := SHR(IN:= {commaSplit[0]}, N:= {commaSplit[1]});");
+
+        }
+        private void HandleCas(int index)
+        {
+            //  cas_de W0210
+            //  CASE _variable_name_ OF
+            var replacedString = ProgramToConvert[index].Replace("cas_de ", "");
+            ConvertedProgram.Add($"CASE {replacedString.Trim()} OF");
+
+        }
+        private void HandleQuand(int index)
+        {
+            //  quand 16#1
+            //  16#1:
+            var replacedString = ProgramToConvert[index].Replace("quand ", "");
+            ConvertedProgram.Add($"{replacedString.Trim()}:");
+
+        }
+        private void HandleAutres(int index)
+        {
+            //  autres
+            //  ELSE ;
+            ConvertedProgram.Add($"ELSE ;");
+
+        }
+        private void HandleFincas(int index)
+        {
+            //  cas_de W0210
+            //  CASE _variable_name_ OF
+            ConvertedProgram.Add($"END_CASE;");
+
+        }
+
         private void HandleReset(int index)
         {
             var line = ProgramToConvert[index].Replace("boo", "");
@@ -277,7 +344,16 @@ namespace ParsingLib.Services
             {
 
                 ConvertedProgram.Add($" {commaSplit[i].Trim()} := {splitLine[0].Trim()}.X{i};");
-
+                //if (i > 7)
+                //{
+                //    //ConvertedProgram.Add($"{splitLine[1].Trim()}.X{i - 8} := {commaSplit[i].Trim()} ;");
+                //    ConvertedProgram.Add($" {commaSplit[i].Trim()} := {splitLine[0].Trim()}.X{i-8};");
+                //}
+                //else
+                //{
+                //    //ConvertedProgram.Add($"{splitLine[1].Trim()}.X{i + 8} := {commaSplit[i].Trim()} ;");
+                //    ConvertedProgram.Add($" {commaSplit[i].Trim()} := {splitLine[0].Trim()}.X{i+8};");
+                //}
 
 
             }
@@ -292,8 +368,16 @@ namespace ParsingLib.Services
             ConvertedProgram.Add($"{splitLine[1].Trim()} := 0;");
             for (int i = 0; i < commaSplit.Length; i++)
             {
-
                 ConvertedProgram.Add($"{splitLine[1].Trim()}.X{i} := {commaSplit[i].Trim()} ;");
+                //if (i > 7)
+                //{
+                //    ConvertedProgram.Add($"{splitLine[1].Trim()}.X{i-8} := {commaSplit[i].Trim()} ;");
+                //}
+                //else
+                //{
+                //    ConvertedProgram.Add($"{splitLine[1].Trim()}.X{i + 8} := {commaSplit[i].Trim()} ;");
+                //}
+
 
             }
 
@@ -314,6 +398,7 @@ namespace ParsingLib.Services
         private void HandleSi(int index)
         {
             var line = ProgramToConvert[index].Replace("si ", "IF ").Replace("{", "(").Replace("}", ")") + " THEN";
+            line = HandleBooInsideCondition(line);
             ConvertedProgram.Add(line);
         }
 
@@ -342,6 +427,12 @@ namespace ParsingLib.Services
         {
             var line = ProgramToConvert[index].Replace("trf ", "");
             var splitLine = line.Split('=');
+
+            if (line.Contains("T") && line.Contains("_"))
+            {
+                splitLine[1] = "//" + splitLine[1];
+                splitLine[0] = splitLine[0] + "  NIET LANGER NODIG, PERIPH KAN RECHSTREEKS AANGESPROKEN WORDEN  ";
+            }
             if (line.Contains("\"F"))
             {
                 string wordAddress = splitLine[1][3].ToString() + splitLine[1][4].ToString() + splitLine[1][5].ToString() + splitLine[1][6].ToString();
@@ -433,6 +524,13 @@ namespace ParsingLib.Services
 
             }
 
+            if (afterEqual.Contains("td"))
+            {
+
+                afterEqual = TimerConvert(afterEqual);
+                beforeEqual = $"NOT( {beforeEqual.Trim()} )";
+            }
+
             if (beforeEqual.Contains("\"T"))
             {
 
@@ -477,7 +575,7 @@ namespace ParsingLib.Services
                 line = beforeAccolade + splitString[1];
             }
 
-            line = line.Replace(".", "AND ").Replace("+", "OR ").Replace("OX", "XOR ").Replace("/", "NOT ").Replace("_", ".X");
+            line = line.Replace(".", "AND ").Replace("+", "OR ").Replace("ox", "XOR ").Replace("/", "NOT ").Replace("_", ".X");
 
             if (line.Contains("\"T"))
             {
