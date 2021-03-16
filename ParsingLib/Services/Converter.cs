@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ParsingLib.Entities;
 
 namespace ParsingLib.Services
 {
@@ -97,7 +98,60 @@ namespace ParsingLib.Services
 
         private void HandleTUnderscore(int index)
         {
-            //enal
+            //  trf T16_XXXX = TXX_XXXX
+            var replacedString = ProgramToConvert[index];
+            string[] splitString = Regex.Split(replacedString, @"([ _T])");
+            var theList = splitString.ToList();
+            for (int i = 0; i < splitString.Count(); i++)
+            {
+                if (splitString[i].Equals("") || splitString[i].Contains(' '))
+                {
+                    theList.RemoveAt(theList.IndexOf(splitString[i]));
+                }
+            }
+
+            var newLine = "";
+
+            foreach (var item in theList)
+            {
+                if (!item.Contains("trf") && !item.Contains("T"))
+                {
+                    newLine += item.Trim() + " ";
+
+                }
+            }
+
+            var equalString = newLine.Split('=');
+            var spaceSplitBeforeEqual = equalString[0].Trim().Split(' ');
+            var spaceSplitAfterEqual = equalString[1].Trim().Split(' ');
+
+            if (Regex.IsMatch(newLine, @"([W][0-9][0-9A-Z][0-9A-Z][0-9A-Z])") && Regex.IsMatch(newLine, @"([A][0-9][0-9A-Z][0-9A-Z][0-9A-Z])")) // is het een woord dat naar een output schrijft?
+            {
+                string wordAddress = spaceSplitBeforeEqual[0][2].ToString() + spaceSplitBeforeEqual[0][3].ToString() + spaceSplitBeforeEqual[0][4].ToString() + spaceSplitBeforeEqual[0][5].ToString();
+                string wordAddress2 = spaceSplitAfterEqual[2][1].ToString() + spaceSplitAfterEqual[2][2].ToString() + spaceSplitAfterEqual[2][3].ToString();
+
+                var decValueWord1 = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
+                var decValueWord2 = int.Parse(wordAddress2, System.Globalization.NumberStyles.HexNumber);
+
+                newLine = $"#RetVal := BLKMOV(SRCBLK := P#M{decValueWord1 + 1}.0 BYTE 1, DSTBLK => P#Q{decValueWord2}.0 BYTE  1);";
+                newLine += $"\n #RetVal := BLKMOV(SRCBLK := P#M{decValueWord1}.0 BYTE 1, DSTBLK => P#Q{decValueWord2 + 1}.0 BYTE  1);";
+
+                ConvertedProgram.Insert(3, $"VAR_TEMP\nRetVal: Int;\nEND_VAR");
+            }
+            else
+            {
+                if (Regex.IsMatch(newLine, @"([P][0-9][0-9A-Z][0-9A-Z][0-9A-Z])"))
+                {
+                    HandleTrf(index); 
+                    return;
+                }
+                
+            }
+
+            //newLine = equalString[1] + equalString[0];
+
+            Console.WriteLine(newLine);
+            ConvertedProgram.Add(newLine);
         }
 
         private int HandleMr(int index)
