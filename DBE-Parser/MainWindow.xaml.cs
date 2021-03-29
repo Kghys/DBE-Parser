@@ -48,16 +48,17 @@ namespace DBE_Parser
 
         private void BtnConvertFile_Click(object sender, RoutedEventArgs e)
         {
-            fileSavePaths = new FolderBrowserDialog();
-            fileSavePaths.SelectedPath = Path.GetDirectoryName(fileOpenPaths.FileNames[0].ToString());
-            DialogResult result = fileSavePaths.ShowDialog();
-            txtConverted.Clear();
+            //try
+            //{
+                fileSavePaths = new FolderBrowserDialog();
+                fileSavePaths.SelectedPath = Path.GetDirectoryName(fileOpenPaths.FileNames[0].ToString());
+                DialogResult result = fileSavePaths.ShowDialog();
+                txtConverted.Clear();
 
-            Analyzing = new Analyze();
+                Analyzing = new Analyze();
 
-            Console.WriteLine(fileSavePaths.SelectedPath);
-            try
-            {
+                Console.WriteLine(fileSavePaths.SelectedPath);
+
                 foreach (string fileName in fileOpenPaths.FileNames)
                 {
                     string onlyFileName = System.IO.Path.GetFileNameWithoutExtension(fileName);
@@ -70,7 +71,7 @@ namespace DBE_Parser
                         fileLines.Add(line);
                     }
                     fileReader.Close();
-                    newFileLines = testConverting.Convert(fileLines,onlyFileName);
+                    newFileLines = testConverting.Convert(fileLines, onlyFileName);
 
                     //analyze converted syntaxes
                     operandsCounted = Analyzing.CountBoos(newFileLines, operandsInProgram);
@@ -90,12 +91,12 @@ namespace DBE_Parser
                 }
 
 
-            }
-            catch (Exception)
-            {
+            //}
+            //catch (Exception Ex)
+            //{
 
-                return;
-            }
+            //    System.Windows.MessageBox.Show(Ex.Message);
+            //}
 
 
         }
@@ -119,7 +120,7 @@ namespace DBE_Parser
 
                 worksheet.Cells[headerRange].LoadFromArrays(headerRow);
 
-
+                tagHelper.MakeTags();
                 worksheet.Cells[2, 1].LoadFromCollection(tagHelper.TagList);
                 FileInfo excelFile = new FileInfo(path + "/Test.xlsx");
                 excel.SaveAs(excelFile);
@@ -130,47 +131,56 @@ namespace DBE_Parser
 
         private void BtnAnalyzeFile_Click(object sender, RoutedEventArgs e)
         {
-            int totalLines = 0;
-            //grote file clearen
-            giantFile.Clear();
-            txtEditor.Clear();
-            operandsInProgram = new List<string>();
-            tagHelper = new TagHelper();
-            Analyzing = new Analyze();
-
-            foreach (string fileName in fileOpenPaths.FileNames)
+            try
             {
 
+                int totalLines = 0;
+                //grote file clearen
+                giantFile.Clear();
+                txtEditor.Clear();
+                operandsInProgram = new List<string>();
+                tagHelper = new TagHelper();
+                Analyzing = new Analyze();
 
-                fileLines.Clear();
-                int counter = 0;
-                string line;
-                StreamReader fileReader = new StreamReader(fileName);
-                while ((line = fileReader.ReadLine()) != null)
+                foreach (string fileName in fileOpenPaths.FileNames)
                 {
-                    counter++;
-                    fileLines.Add(line);
-                    //de lijn ook in de grote file steken.
-                    giantFile.Add(line);
-                    totalLines += 1;
+
+
+                    fileLines.Clear();
+                    int counter = 0;
+                    string line;
+                    StreamReader fileReader = new StreamReader(fileName);
+                    while ((line = fileReader.ReadLine()) != null)
+                    {
+                        counter++;
+                        fileLines.Add(line);
+                        //de lijn ook in de grote file steken.
+                        giantFile.Add(line);
+                        totalLines += 1;
+
+                    }
+
+                    fileReader.Close();
+                    Console.WriteLine("There were {0} lines.", counter);
+
+                    tagsInProgram = tagHelper.ConvertVariables(fileLines);
+                    operandsInProgram = tagHelper.Operands;
+
+                    operandsCounted = Analyzing.CountBoos(fileLines, operandsInProgram);
 
                 }
 
-                fileReader.Close();
-                Console.WriteLine("There were {0} lines.", counter);
+                for (int i = 0; i < operandsInProgram.Count(); i++)
+                {
 
-                tagsInProgram = tagHelper.ConvertVariables(fileLines);
-                operandsInProgram = tagHelper.Operands;
+                    txtEditor.AppendText($"{operandsInProgram[i]} count : {operandsCounted[i]}\n");
 
-                operandsCounted = Analyzing.CountBoos(fileLines, operandsInProgram);
-
+                }
             }
-
-            for (int i = 0; i < operandsInProgram.Count(); i++)
+            catch (Exception Ex)
             {
 
-                txtEditor.AppendText($"{operandsInProgram[i]} count : {operandsCounted[i]}\n");
-
+                System.Windows.MessageBox.Show(Ex.Message);
             }
 
         }
