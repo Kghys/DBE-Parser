@@ -510,7 +510,7 @@ namespace ParsingLib.Services
                 // THIS IS A DECIMAL TO BINAIRY DECIMAL ENCODING
                 var splitLine = line.Replace("dtb", "@").Split('@');
 
-                line = $"{splitLine[1].Trim()} := INT_TO_BCD16({splitLine[0].Trim()});";
+                line = $"{splitLine[1].Trim()} := BCD16_TO_INT({splitLine[0].Trim()});";
 
             }
             if (line.Contains("btd"))
@@ -518,7 +518,7 @@ namespace ParsingLib.Services
                 // THIS IS A BINAIRY TO DECIMAL ENCODING
                 var splitLine = line.Replace("btd", "@").Split('@');
 
-                line = $"{splitLine[1].Trim()} := BCD16_TO_INT( {splitLine[0].Trim()});";
+                line = $"{splitLine[1].Trim()} := INT_TO_BCD16({splitLine[0].Trim()});";
             }
 
             ConvertedProgram.Add(line);
