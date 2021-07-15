@@ -48,19 +48,21 @@ namespace DBE_Parser
 
         private void BtnConvertFile_Click(object sender, RoutedEventArgs e)
         {
-            //try
-            //{
+            try
+            {
                 fileSavePaths = new FolderBrowserDialog();
                 fileSavePaths.SelectedPath = Path.GetDirectoryName(fileOpenPaths.FileNames[0].ToString());
                 DialogResult result = fileSavePaths.ShowDialog();
+                var count = 0;
                 txtConverted.Clear();
 
                 Analyzing = new Analyze();
 
                 Console.WriteLine(fileSavePaths.SelectedPath);
-
+                progress.Maximum = fileOpenPaths.FileNames.Length;
                 foreach (string fileName in fileOpenPaths.FileNames)
                 {
+                    count++;
                     string onlyFileName = System.IO.Path.GetFileNameWithoutExtension(fileName);
                     newFileLines.Clear();
                     fileLines.Clear();
@@ -77,6 +79,7 @@ namespace DBE_Parser
                     operandsCounted = Analyzing.CountBoos(newFileLines, operandsInProgram);
 
                     File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
+                    progress.Value = count;
                 }
 
                 File.WriteAllLines(fileSavePaths.SelectedPath + "/BigProgram.scl", giantFile);
@@ -91,12 +94,12 @@ namespace DBE_Parser
                 }
 
 
-            //}
-            //catch (Exception Ex)
-            //{
+            }
+            catch (Exception Ex)
+            {
 
-            //    System.Windows.MessageBox.Show(Ex.Message);
-            //}
+                System.Windows.MessageBox.Show(Ex.Message);
+            }
 
 
         }
