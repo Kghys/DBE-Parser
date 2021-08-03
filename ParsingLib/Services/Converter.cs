@@ -134,7 +134,7 @@ namespace ParsingLib.Services
                 var decValueWord2 = int.Parse(wordAddress2, System.Globalization.NumberStyles.HexNumber);
 
                 newLine = $"#RetVal := BLKMOV(SRCBLK := P#M{decValueWord1 + 1}.0 BYTE 1, DSTBLK => P#Q{decValueWord2}.0 BYTE  1);";
-                newLine += $"\n #RetVal := BLKMOV(SRCBLK := P#M{decValueWord1}.0 BYTE 1, DSTBLK => P#Q{decValueWord2 + 1}.0 BYTE  1);";
+                newLine += $"\n#RetVal := BLKMOV(SRCBLK := P#M{decValueWord1}.0 BYTE 1, DSTBLK => P#Q{decValueWord2 + 1}.0 BYTE  1);";
 
                 ConvertedProgram.Insert(3, $"VAR_TEMP\nRetVal: Int;\nEND_VAR");
             }
@@ -145,7 +145,22 @@ namespace ParsingLib.Services
                     HandleTrf(index); 
                     return;
                 }
-                
+
+                //INPUT 
+                if (Regex.IsMatch(newLine, @"([W][0-9][0-9A-Z][0-9A-Z][0-9A-Z])") && Regex.IsMatch(newLine, @"([E][0-9][0-9A-Z][0-9A-Z][0-9A-Z])")) // is het een woord dat naar een input schrijft?
+                {
+                    string wordAddress2 = spaceSplitBeforeEqual[2][1].ToString() + spaceSplitBeforeEqual[2][2].ToString() + spaceSplitBeforeEqual[2][3].ToString();
+                    string wordAddress = spaceSplitAfterEqual[0][2].ToString() + spaceSplitAfterEqual[0][3].ToString() + spaceSplitAfterEqual[0][4].ToString() + spaceSplitAfterEqual[0][5].ToString();
+
+                    var decValueWord1 = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
+                    var decValueWord2 = int.Parse(wordAddress2, System.Globalization.NumberStyles.HexNumber);
+
+                    newLine = $"#RetVal := BLKMOV(SRCBLK := P#I{decValueWord2 + 1}.0 BYTE 1, DSTBLK => P#M{decValueWord1}.0 BYTE  1);";
+                    newLine += $"\n#RetVal := BLKMOV(SRCBLK := P#I{decValueWord2}.0 BYTE 1, DSTBLK => P#M{decValueWord1 + 1}.0 BYTE  1);";
+
+                    ConvertedProgram.Insert(3, $"VAR_TEMP\nRetVal: Int;\nEND_VAR");
+                }
+
             }
 
             //newLine = equalString[1] + equalString[0];
@@ -508,17 +523,19 @@ namespace ParsingLib.Services
             if (line.Contains("dtb"))
             {
                 // THIS IS A DECIMAL TO BINAIRY DECIMAL ENCODING
+                // BCD32 want BCD16 gaat blijkbaar maar van -999 tot 999 => bijgevolg ook DINT-INT converting
                 var splitLine = line.Replace("dtb", "@").Split('@');
 
-                line = $"{splitLine[1].Trim()} := BCD16_TO_INT({splitLine[0].Trim()});";
+                line = $"{splitLine[1].Trim()} := DINT_TO_INT(BCD32_TO_DINT({splitLine[0].Trim()}));";
 
             }
             if (line.Contains("btd"))
             {
                 // THIS IS A BINAIRY TO DECIMAL ENCODING
+                // BCD32 want BCD16 gaat blijkbaar maar van -999 tot 999 => bijgevolg ook DINT-INT converting
                 var splitLine = line.Replace("btd", "@").Split('@');
 
-                line = $"{splitLine[1].Trim()} := INT_TO_BCD16({splitLine[0].Trim()});";
+                line = $"{splitLine[1].Trim()} := DINT_TO_BCD32(INT_TO_DINT({splitLine[0].Trim()}));";
             }
 
             ConvertedProgram.Add(line);
@@ -569,7 +586,7 @@ namespace ParsingLib.Services
 
             beforeEqual = beforeEqual.Replace("@", "=");
 
-            beforeEqual = beforeEqual.Replace(".", "AND ").Replace("+", "OR ").Replace("OX", "XOR ").Replace("/", "NOT ").Replace("_", ".X");
+            beforeEqual = beforeEqual.Replace(".", "AND ").Replace("+", "OR ").Replace("OX", "XOR ").Replace("/", "NOT ").Replace("_", ".%X");
 
             if (afterEqual.Contains("tm"))
             {

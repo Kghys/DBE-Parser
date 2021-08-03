@@ -9,14 +9,16 @@
     <Grid>
         <WrapPanel HorizontalAlignment="Center">
             <StackPanel>
-                <TextBox  Name="Title" Text="Cegelec Parsing" IsEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30px" Width="400"  Padding="0,0,0,5"  VerticalContentAlignment="Center" HorizontalContentAlignment="Center" BorderBrush="#00ABADB3"/>
+                <Label  Name="Title" Content="Cegelec Parsing" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30px" Width="400"  Padding="0,0,0,5"  VerticalContentAlignment="Center" HorizontalContentAlignment="Center" BorderBrush="#00ABADB3"/>
+                <Separator Height="20px" />
                 <Button Name="btnOpenFile" Click="BtnOpenFile_Click" FontSize="18" HorizontalContentAlignment="Center"  Height="40px" >OPEN FILE(S)</Button>
                 <Button Name="btnAnalyzeFile" Click="BtnAnalyzeFile_Click" Height="40px"  Background="#FF88D5EC" Foreground="White" FontSize="18" >ANALYZE FILE</Button>
                 <Button Name="btnConvertFile" Click="BtnConvertFile_Click"  Height="40px"   FontSize="18" Background="#FFFF8383" >CONVERT FILE</Button>
-                <TextBox  Name="TitleText2" Text="Source contains:" IsEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20px" Margin="10px" Padding="6,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" BorderBrush="#00ABADB3"/>
-                <TextBox Name="txtEditor" Height="100px" VerticalScrollBarVisibility="Visible" Padding="0" />
-                <TextBox  Name="TitleText3" Text="Converted files contain:" IsEnabled="False" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10px" FontSize="20px"  Padding="6,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" BorderBrush="#00ABADB3"/>
-                <TextBox Name="txtConverted" Height="100px" VerticalScrollBarVisibility="Visible" />
+                <Separator Height="20px" />
+                <Label  x:Name="TitleText2" Content="Source contains:"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 10" Padding="6,0"  FontSize="20px" />
+                <TextBox Name="txtEditor" Height="200px" VerticalScrollBarVisibility="Visible" Padding="0" />
+                <Label  Name="TitleText3" Content="Converted files contain:" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10px" FontSize="20px"  Padding="6,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" BorderBrush="#00ABADB3"/>
+                <TextBox Name="txtConverted" Height="200px" VerticalScrollBarVisibility="Visible" />
                 <ProgressBar Width="400px" Margin="0 0 0 10" Height="20px" x:Name="progress"/>
             </StackPanel>
 

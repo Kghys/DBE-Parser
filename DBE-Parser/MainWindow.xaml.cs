@@ -27,8 +27,6 @@ namespace DBE_Parser
         List<int> operandsCounted = new List<int>();
 
         Analyze Analyzing = new Analyze();
-        Converting converter = new Converting();
-        //in testing
         Converter testConverting = new Converter();
         TagHelper tagHelper = new TagHelper();
 
@@ -41,7 +39,6 @@ namespace DBE_Parser
         {
             fileOpenPaths = new OpenFileDialog();
             fileOpenPaths.Multiselect = true;
-
             fileOpenPaths.ShowDialog();
 
         }
@@ -53,7 +50,7 @@ namespace DBE_Parser
                 fileSavePaths = new FolderBrowserDialog();
                 fileSavePaths.SelectedPath = Path.GetDirectoryName(fileOpenPaths.FileNames[0].ToString());
                 DialogResult result = fileSavePaths.ShowDialog();
-                var count = 0;
+                var progressValue = 0;
                 txtConverted.Clear();
 
                 Analyzing = new Analyze();
@@ -62,7 +59,8 @@ namespace DBE_Parser
                 progress.Maximum = fileOpenPaths.FileNames.Length;
                 foreach (string fileName in fileOpenPaths.FileNames)
                 {
-                    count++;
+                    //progressbar
+                    progressValue++;
                     string onlyFileName = System.IO.Path.GetFileNameWithoutExtension(fileName);
                     newFileLines.Clear();
                     fileLines.Clear();
@@ -79,10 +77,10 @@ namespace DBE_Parser
                     operandsCounted = Analyzing.CountBoos(newFileLines, operandsInProgram);
 
                     File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
-                    progress.Value = count;
+                    progress.Value = progressValue;
                 }
 
-                File.WriteAllLines(fileSavePaths.SelectedPath + "/BigProgram.scl", giantFile);
+                File.WriteAllLines(fileSavePaths.SelectedPath + "/BigProgram-Source.scl", giantFile);
                 // alles in 1 file gieten
                 WriteExcel(fileSavePaths.SelectedPath);
 
@@ -106,7 +104,7 @@ namespace DBE_Parser
 
         private void WriteExcel(string path)
         {
-
+            //Build excel file
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (ExcelPackage excel = new ExcelPackage())
             {
@@ -125,7 +123,7 @@ namespace DBE_Parser
 
                 tagHelper.MakeTags();
                 worksheet.Cells[2, 1].LoadFromCollection(tagHelper.TagList);
-                FileInfo excelFile = new FileInfo(path + "/Test.xlsx");
+                FileInfo excelFile = new FileInfo(path + "/TagTable.xlsx");
                 excel.SaveAs(excelFile);
             }
 

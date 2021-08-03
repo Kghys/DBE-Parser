@@ -140,6 +140,9 @@ namespace ParsingLib
                 case 'T':
                     tagToBeAdded = new Tag { Name = TagName, DataType = "", LogicalAddress = $"" };
                     break;
+                case 'Z':
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValueBool + 2}.{TagName[4]}" };
+                    break;
                 default:
                     tagToBeAdded = null;
                     break;
