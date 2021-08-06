@@ -501,8 +501,23 @@ namespace ParsingLib.Services
             {
                 splitLine[1] = "//" + splitLine[1];
                 splitLine[0] = splitLine[0] + "  NIET LANGER NODIG, PERIPH KAN RECHSTREEKS AANGESPROKEN WORDEN  ";
+
+                line = $"{splitLine[1]} := {splitLine[0]};";
             }
-            if (line.Contains("\"F"))
+            //CATCH Word (decimal) into time, but has to be *100 because old times were in .1 second units
+            if (line.Contains("\"F") && line.Contains("\"W"))
+            {
+                string wordAddress = splitLine[1][3].ToString() + splitLine[1][4].ToString() + splitLine[1][5].ToString() + splitLine[1][6].ToString();
+
+                var decValueWord = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
+                // "Timers".T[59].PT := "B0120";
+                splitLine[1] = $"\"Timers\".T[{decValueWord}].PT";
+
+                splitLine[0] = "WORD_TO_TIME(" + splitLine[0].Trim() + " * 100)";
+                line = $"{splitLine[1]} := {splitLine[0]};";
+                ConvertedProgram.Add(line);
+            }
+            if (line.Contains("\"F") && !line.Contains("\"W") )
             {
                 string wordAddress = splitLine[1][3].ToString() + splitLine[1][4].ToString() + splitLine[1][5].ToString() + splitLine[1][6].ToString();
 
@@ -511,9 +526,9 @@ namespace ParsingLib.Services
                 splitLine[1] = $"\"Timers\".T[{decValueWord}].PT";
 
                 splitLine[0] = splitLine[0].Replace("10#", "T#").Trim() + "00ms";
+                line = $"{splitLine[1]} := {splitLine[0]};";
+                ConvertedProgram.Add(line.Replace("_", ".X"));
             }
-            line = $"{splitLine[1]} := {splitLine[0]};";
-            ConvertedProgram.Add(line.Replace("_", ".X"));
         }
 
         private void HandleTra(int index)
