@@ -19,12 +19,12 @@ namespace DBE_Parser
     {
         OpenFileDialog fileOpenPaths;
         FolderBrowserDialog fileSavePaths;
-        List<string> fileLines = new List<string>();
-        List<string> giantFile = new List<string>();
-        List<string> newFileLines = new List<string>();
-        List<string> tagsInProgram = new List<string>();
-        List<string> operandsInProgram = new List<string>();
-        List<int> operandsCounted = new List<int>();
+        private List<string> fileLines = new List<string>();
+        private List<string> giantFile = new List<string>();
+        private List<string> newFileLines = new List<string>();
+        private List<string> tagsInProgram = new List<string>();
+        private List<string> operandsInProgram = new List<string>();
+        private List<int> operandsCounted = new List<int>();
 
         Analyze Analyzing = new Analyze();
         Converter testConverting = new Converter();
@@ -53,6 +53,8 @@ namespace DBE_Parser
                 var progressValue = 0;
                 txtConverted.Clear();
 
+                //build taglist
+                tagHelper.MakeTags();
                 Analyzing = new Analyze();
 
                 Console.WriteLine(fileSavePaths.SelectedPath);
@@ -71,10 +73,8 @@ namespace DBE_Parser
                         fileLines.Add(line);
                     }
                     fileReader.Close();
-                    newFileLines = testConverting.Convert(fileLines, onlyFileName);
+                    newFileLines = testConverting.Convert(fileLines, onlyFileName, tagHelper) ;
 
-                    //analyze converted syntaxes
-                    operandsCounted = Analyzing.CountBoos(newFileLines, operandsInProgram);
 
                     File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
                     progress.Value = progressValue;
@@ -121,7 +121,7 @@ namespace DBE_Parser
 
                 worksheet.Cells[headerRange].LoadFromArrays(headerRow);
 
-                tagHelper.MakeTags();
+                //tagHelper.MakeTags();
                 worksheet.Cells[2, 1].LoadFromCollection(tagHelper.TagList);
                 FileInfo excelFile = new FileInfo(path + "/TagTable.xlsx");
                 excel.SaveAs(excelFile);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -13,9 +14,13 @@ namespace ParsingLib.Services
 
         List<string> ConvertedProgram;
         List<string> ProgramToConvert;
+        private List<Tag> tags = new List<Tag>();
+        private string ldx = "";
+        private string stx = "";
 
-        public List<string> Convert(List<string> Program, string BlockName)
+        public List<string> Convert(List<string> Program, string BlockName, TagHelper tagHelper)
         {
+            tags = tagHelper.TagList;
             this.ProgramToConvert = Program;
             ConvertedProgram = new List<string>();
             //start with blockdeclaration
@@ -28,8 +33,20 @@ namespace ParsingLib.Services
                 {
                     i = ConvertLine(line, i);
                 }
+                else
+                {
+                    ConvertedProgram.Add($"");
+                }
             }
-
+            ConvertedProgram.Add($"");
+            for (int i = 0; i < ProgramToConvert.Count(); i++)
+            {
+                var line = ProgramToConvert[i];
+                if (!(line.Trim() == ""))
+                {
+                    ConvertedProgram.Add($"// {line}");
+                }
+            }
 
             ConvertedProgram.Add("END_FUNCTION");
 
@@ -42,6 +59,7 @@ namespace ParsingLib.Services
             ConvertedProgram.Add("{ S7_Optimized_Acces := 'TRUE'}");
             ConvertedProgram.Add("VERSION : 0.1");
             ConvertedProgram.Add("BEGIN");
+            ConvertedProgram.Add($"");
         }
 
 
@@ -50,8 +68,8 @@ namespace ParsingLib.Services
             var index = i;
             var newIndex = index;
             AddVariables(index);
-            ConvertedProgram.Add($"");
-            ConvertedProgram.Add($"// {ProgramToConvert[index]}");
+            //ConvertedProgram.Add($"");
+            //ConvertedProgram.Add($"// {ProgramToConvert[index]}");
             if (programLine.Contains("(*")) { ConvertedProgram.Add(ProgramToConvert[index].Replace("(*", "//")); return newIndex; }
             //REGEX: Kijk of er iets inzit dan lijkt op het volgende: TXXX_XXXX (zoals T16_W0104)
             if (Regex.IsMatch(programLine, @"(T[0-9]*[0-9]*[0-9]_[A-Z][0-9][0-9A-Z][0-9A-Z][0-9A-Z])")) { HandleTUnderscore(index); return newIndex; }
@@ -70,6 +88,9 @@ namespace ParsingLib.Services
             if (programLine.Contains("quand ")) { HandleQuand(index); return newIndex; }
             if (programLine.Contains("autres")) { HandleAutres(index); return newIndex; }
             if (programLine.Contains("fincas")) { HandleFincas(index); return newIndex; }
+            if (programLine.Contains("stx ")) { HandleStx(index); return newIndex; }
+            if (programLine.Contains("ldx ")) { HandleLdx(index); return newIndex; }
+            if (programLine.Contains("(X)")) { HandleX(index); return newIndex; }
             if (programLine.Contains("fm ")) { HandleFm(index); return newIndex; }
             if (programLine.Contains("fd ")) { HandleFd(index); return newIndex; }
             if (programLine.Contains("jmp ")) { HandleJmp(index); return newIndex; }
@@ -94,6 +115,53 @@ namespace ParsingLib.Services
 
             // default implementeren, unknown
             return newIndex;
+        }
+
+        private string GetAdress(string tagName)
+        {
+            tagName = tagName.Trim().Replace("\"","");
+            string directAdress = "";
+
+            if (tags.Where(t => t.Name == tagName).FirstOrDefault() != null)
+            {
+                directAdress = tags.Where(t => t.Name == tagName).FirstOrDefault().LogicalAddress.Replace("%MW", "").Replace("%I","").Replace("%Q","");
+            }
+            return directAdress;
+        }
+
+        private void HandleX(int index)
+        {
+            //get line
+            var line = ProgramToConvert[index].Replace("trf ", ""); 
+            line = line.Replace("(X)", "");
+            var splitLine = line.Split('=');
+
+            //Check if time
+            if (line.Contains("\"F"))
+            {
+                string wordAddress = splitLine[1][3].ToString() + splitLine[1][4].ToString() + splitLine[1][5].ToString() + splitLine[1][6].ToString();
+                
+                var decValueWord = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
+                // "Timers".T[59].PT := "B0120";
+                splitLine[1] = $"\"Timers\".T[{decValueWord}].PT";
+
+                string directAdress = GetAdress(splitLine[0]);
+
+                line = $"{splitLine[1]} := WORD_TO_TIME(PEEK_WORD(area:= 16#83, dbNumber := 0, byteOffset := {directAdress} + {ldx})*100);";
+                
+            }
+            ConvertedProgram.Add(line);
+        }
+        private void HandleLdx(int index)
+        {
+            var replacedString = ProgramToConvert[index].Replace("ldx", "");
+            ldx = replacedString;
+        }
+
+        private void HandleStx(int index)
+        {
+            var replacedString = ProgramToConvert[index].Replace("stx", "");
+            stx = replacedString;
         }
 
         private void HandleTUnderscore(int index)
@@ -133,8 +201,10 @@ namespace ParsingLib.Services
                 var decValueWord1 = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
                 var decValueWord2 = int.Parse(wordAddress2, System.Globalization.NumberStyles.HexNumber);
 
-                newLine = $"#RetVal := BLKMOV(SRCBLK := P#M{decValueWord1 + 1}.0 BYTE 1, DSTBLK => P#Q{decValueWord2}.0 BYTE  1);";
-                newLine += $"\n#RetVal := BLKMOV(SRCBLK := P#M{decValueWord1}.0 BYTE 1, DSTBLK => P#Q{decValueWord2 + 1}.0 BYTE  1);";
+                int directAdress = int.Parse(GetAdress(spaceSplitBeforeEqual[0]));
+
+                newLine = $"#RetVal := BLKMOV(SRCBLK := P#M{directAdress + 1}.0 BYTE 1, DSTBLK => P#Q{decValueWord2}.0 BYTE  1);";
+                newLine += $"\n#RetVal := BLKMOV(SRCBLK := P#M{directAdress}.0 BYTE 1, DSTBLK => P#Q{decValueWord2 + 1}.0 BYTE  1);";
 
                 ConvertedProgram.Insert(3, $"VAR_TEMP\nRetVal: Int;\nEND_VAR");
             }
@@ -142,7 +212,7 @@ namespace ParsingLib.Services
             {
                 if (Regex.IsMatch(newLine, @"([P][0-9][0-9A-Z][0-9A-Z][0-9A-Z])"))
                 {
-                    HandleTrf(index); 
+                    HandleTrf(index);
                     return;
                 }
 
@@ -150,13 +220,13 @@ namespace ParsingLib.Services
                 if (Regex.IsMatch(newLine, @"([W][0-9][0-9A-Z][0-9A-Z][0-9A-Z])") && Regex.IsMatch(newLine, @"([E][0-9][0-9A-Z][0-9A-Z][0-9A-Z])")) // is het een woord dat naar een input schrijft?
                 {
                     string wordAddress2 = spaceSplitBeforeEqual[2][1].ToString() + spaceSplitBeforeEqual[2][2].ToString() + spaceSplitBeforeEqual[2][3].ToString();
-                    string wordAddress = spaceSplitAfterEqual[0][2].ToString() + spaceSplitAfterEqual[0][3].ToString() + spaceSplitAfterEqual[0][4].ToString() + spaceSplitAfterEqual[0][5].ToString();
 
-                    var decValueWord1 = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
                     var decValueWord2 = int.Parse(wordAddress2, System.Globalization.NumberStyles.HexNumber);
 
-                    newLine = $"#RetVal := BLKMOV(SRCBLK := P#I{decValueWord2 + 1}.0 BYTE 1, DSTBLK => P#M{decValueWord1}.0 BYTE  1);";
-                    newLine += $"\n#RetVal := BLKMOV(SRCBLK := P#I{decValueWord2}.0 BYTE 1, DSTBLK => P#M{decValueWord1 + 1}.0 BYTE  1);";
+                    int directAdress = int.Parse(GetAdress(spaceSplitAfterEqual[0]));
+
+                    newLine = $"#RetVal := BLKMOV(SRCBLK := P#I{decValueWord2 + 1}.0 BYTE 1, DSTBLK => P#M{directAdress}.0 BYTE  1);";
+                    newLine += $"\n#RetVal := BLKMOV(SRCBLK := P#I{decValueWord2}.0 BYTE 1, DSTBLK => P#M{directAdress + 1}.0 BYTE  1);";
 
                     ConvertedProgram.Insert(3, $"VAR_TEMP\nRetVal: Int;\nEND_VAR");
                 }
@@ -517,7 +587,7 @@ namespace ParsingLib.Services
                 line = $"{splitLine[1]} := {splitLine[0]};";
                 ConvertedProgram.Add(line);
             }
-            if (line.Contains("\"F") && !line.Contains("\"W") )
+            if (line.Contains("\"F") && !line.Contains("\"W"))
             {
                 string wordAddress = splitLine[1][3].ToString() + splitLine[1][4].ToString() + splitLine[1][5].ToString() + splitLine[1][6].ToString();
 
