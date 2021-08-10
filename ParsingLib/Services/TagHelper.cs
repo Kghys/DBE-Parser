@@ -45,18 +45,18 @@ namespace ParsingLib
             {
                 return;
             }
-            string[] spaceSplit = LineToConvert.Split(' ');
+            string[] spaceSplit = LineToConvert.Split(' ','_');
 
 
             for (int j = 0; j < spaceSplit.Length; j++)
             {
 
-                if (/*spaceSplit[j].Length == 5 &&*/ Regex.Match(spaceSplit[j], @"([A-Z])([0-F])([0-F])([0-F])([0-F])").Success)
+                if (spaceSplit[j].Length == 5 && Regex.Match(spaceSplit[j], @"([A-Z])([0-F])([0-F])([0-F])([0-F])").Success)
                 {
                     if (!Variables.Contains(spaceSplit[j]))
                     {
                         Variables.Add(spaceSplit[j]);
-                        
+
                     }
 
                 }
@@ -76,7 +76,7 @@ namespace ParsingLib
 
             }
 
-           
+
         }
 
         public void MakeTags()
@@ -109,7 +109,7 @@ namespace ParsingLib
                     MatrixList.Add(newTagListW);
                     var offset = MatrixList.IndexOf(newTagListW);
                     tagToBeAdded = new Tag { Name = TagName, DataType = "Word", LogicalAddress = $"%MW{decValueWord + 5000 + (offset)}" };
-                    break; 
+                    break;
                 case 'J':
                     tagToBeAdded = new Tag { Name = TagName, DataType = "Byte", LogicalAddress = $"%MB{decValueWord}" };
                     break;

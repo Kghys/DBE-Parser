@@ -53,7 +53,7 @@ namespace DBE_Parser
                 var progressValue = 0;
                 txtConverted.Clear();
 
-                //build taglist
+
                 tagHelper.MakeTags();
                 Analyzing = new Analyze();
 
@@ -75,6 +75,8 @@ namespace DBE_Parser
                     fileReader.Close();
                     newFileLines = testConverting.Convert(fileLines, onlyFileName, tagHelper) ;
 
+                    //analyze converted syntaxes
+                    operandsCounted = Analyzing.CountBoos(newFileLines, operandsInProgram);
 
                     File.WriteAllLines(fileSavePaths.SelectedPath + "/" + onlyFileName + ".scl", newFileLines);
                     progress.Value = progressValue;
@@ -121,7 +123,7 @@ namespace DBE_Parser
 
                 worksheet.Cells[headerRange].LoadFromArrays(headerRow);
 
-                //tagHelper.MakeTags();
+                tagHelper.MakeTags();
                 worksheet.Cells[2, 1].LoadFromCollection(tagHelper.TagList);
                 FileInfo excelFile = new FileInfo(path + "/TagTable.xlsx");
                 excel.SaveAs(excelFile);
