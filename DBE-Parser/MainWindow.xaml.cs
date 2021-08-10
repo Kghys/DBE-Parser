@@ -9,6 +9,7 @@ using CsvHelper;
 using OfficeOpenXml;
 using ParsingLib.Services;
 using System.Linq;
+using System.Drawing;
 
 namespace DBE_Parser
 {
@@ -25,6 +26,12 @@ namespace DBE_Parser
         private List<string> tagsInProgram = new List<string>();
         private List<string> operandsInProgram = new List<string>();
         private List<int> operandsCounted = new List<int>();
+
+        private  int inputStart = 0;
+        private  int outputStart = 0;
+        private  int merkerStart = 0;
+        private  int merkerWordStart = 0;
+        private  int zbitStart = 0;
 
         Analyze Analyzing = new Analyze();
         Converter testConverting = new Converter();
@@ -54,7 +61,7 @@ namespace DBE_Parser
                 txtConverted.Clear();
 
 
-                tagHelper.MakeTags();
+                tagHelper.MakeTags(inputStart,outputStart,merkerStart,merkerWordStart,zbitStart);
                 Analyzing = new Analyze();
 
                 Console.WriteLine(fileSavePaths.SelectedPath);
@@ -188,6 +195,75 @@ namespace DBE_Parser
         }
 
 
+        private void txtInputs_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            try
+            {
+                inputStart = int.Parse(txtInputs.Text);
+            }
+            catch (Exception Ex)
+            {
 
+                System.Windows.MessageBox.Show("Enter valid number.");
+                txtInputs.Text = inputStart.ToString();
+            }
+        }
+
+        private void txtOutputs_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            try
+            {
+                outputStart = int.Parse(txtOutputs.Text);
+            }
+            catch (Exception Ex)
+            {
+
+                System.Windows.MessageBox.Show("Enter valid number.");
+                txtOutputs.Text = outputStart.ToString();
+            }
+        }
+
+        private void txtMerkers_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            try
+            {
+                merkerStart = int.Parse(txtMerkers.Text);
+            }
+            catch (Exception Ex)
+            {
+
+                System.Windows.MessageBox.Show("Enter valid number.");
+                txtMerkers.Text = merkerStart.ToString();
+            }
+        }
+
+        private void txtMerkerWords_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            try
+            {
+                merkerWordStart = int.Parse(txtMerkerWords.Text);
+            }
+            catch (Exception Ex)
+            {
+
+                System.Windows.MessageBox.Show("Enter valid number.");
+                txtMerkerWords.Text = merkerWordStart.ToString();
+            }
+        }
+
+        private void txtZBits_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            try
+            {
+                zbitStart = int.Parse(txtZBits.Text);
+            }
+            catch (Exception Ex)
+            {
+
+                System.Windows.MessageBox.Show("Enter valid number.");
+                txtZBits.Text = zbitStart.ToString();
+            }
+        }
+        
     }
 }

@@ -67,6 +67,12 @@ namespace ParsingLib.Services
             ConvertedProgram.Add($"FUNCTION \"{blockName}\" : Void");
             ConvertedProgram.Add("{ S7_Optimized_Acces := 'TRUE'}");
             ConvertedProgram.Add("VERSION : 0.1");
+            //      VAR_TEMP
+            //          x : Int;
+            //          tempLint: Byte;
+            //      END_VAR
+            ConvertedProgram.Add("VAR_TEMP");
+            ConvertedProgram.Add("END_VAR");
             ConvertedProgram.Add("BEGIN");
             ConvertedProgram.Add($"");
         }
@@ -137,8 +143,9 @@ namespace ParsingLib.Services
             // logaritmische uitdrukking, bitwise vergelijkingen van AND, OR, XOR tussen woorden
             var line = ProgramToConvert[index].Replace("log ", "");
             var splitLine = line.Split('=');
-            line = $"POKE(area:=16#83,  dbNumber:=0, byteOffset:= {splitLine[1][3]}{splitLine[1][4]}{splitLine[1][5]}{splitLine[1][6]} + 5000 + x ,value := {splitLine[0].Trim()});";
+            line = $"POKE(area:=16#83,  dbNumber:=0, byteOffset:= {splitLine[1][3]}{splitLine[1][4]}{splitLine[1][5]}{splitLine[1][6]} + 5000 + x ,value := nullLint (* MAYBE REPLACE BY {splitLine[0]} *));";
             ConvertedProgram.Add(line);
+            ConvertedProgram.Insert(4, "nullLint : byte;");
 
         }
 
@@ -153,6 +160,7 @@ namespace ParsingLib.Services
             string line = ProgramToConvert[index];
             line = line.Replace("pour_x_de", "FOR x :=").Replace(", 16", "TO 16").Replace(", 1", "DO");
             ConvertedProgram.Add(line);
+            ConvertedProgram.Insert(4, "x : Int;");
         }
 
         private string GetAdress(string tagName)
@@ -245,15 +253,15 @@ namespace ParsingLib.Services
                 newLine += $"\n#RetVal := BLKMOV(SRCBLK := P#M{directAdress}.0 BYTE 1, DSTBLK => P#Q{decValueWord2 + 1}.0 BYTE  1);";
 
                 ConvertedProgram.Insert(3, $"VAR_TEMP\nRetVal: Int;\nEND_VAR");
+                
             }
             else
             {
-                if (Regex.IsMatch(newLine, @"([P][0-9][0-9A-Z][0-9A-Z][0-9A-Z])") && !newLine.Contains(']'));
+                if (Regex.IsMatch(newLine, @"([P][0-9][0-9A-Z][0-9A-Z][0-9A-Z])") || newLine.Contains("]"))
                 {
                     HandleTrf(index);
                     return;
                 }
-
                 //INPUT 
                 if (Regex.IsMatch(newLine, @"([W][0-9][0-9A-Z][0-9A-Z][0-9A-Z])") && Regex.IsMatch(newLine, @"([E][0-9][0-9A-Z][0-9A-Z][0-9A-Z])")) // is het een woord dat naar een input schrijft?
                 {
@@ -267,7 +275,10 @@ namespace ParsingLib.Services
                     newLine += $"\n#RetVal := BLKMOV(SRCBLK := P#I{decValueWord2}.0 BYTE 1, DSTBLK => P#M{directAdress + 1}.0 BYTE  1);";
 
                     ConvertedProgram.Insert(3, $"VAR_TEMP\nRetVal: Int;\nEND_VAR");
+                    
                 }
+                
+
 
             }
 
@@ -404,7 +415,7 @@ namespace ParsingLib.Services
             ConvertedProgram.Add($"ELSE");
             ConvertedProgram.Add($"//ADD GS_CODE_RESETTING");
             ConvertedProgram.AddRange(tagsToBeReset);
-            ConvertedProgram.Add($"END_IF;              //END OF MasterRelay");
+            ConvertedProgram.Add($"END_IF;              //END OF MasterRelay\n");
 
             return stopLocation;
         }
@@ -427,7 +438,7 @@ namespace ParsingLib.Services
 
             ConvertedProgram.Add($"IF( {equalString[0]} ) THEN");
             ConvertedProgram.Add($"{equalString[1].Trim()};");
-            ConvertedProgram.Add($"END_IF;");
+            ConvertedProgram.Add($"END_IF;\n");
         }
 
         private void HandleFd(int index)
@@ -519,7 +530,7 @@ namespace ParsingLib.Services
             splitLine[0] = HandleBooInsideCondition(splitLine[0]);
             ConvertedProgram.Add($"IF ( {splitLine[0]} ) THEN //{splitLine[1]}");
             ConvertedProgram.Add($"{splitLine[1].Replace("reset", "").Trim()} := 0;");
-            ConvertedProgram.Add($"END_IF;");
+            ConvertedProgram.Add($"END_IF;\n");
         }
 
         private void HandleSet(int index)
@@ -529,7 +540,7 @@ namespace ParsingLib.Services
             splitLine[0] = HandleBooInsideCondition(splitLine[0]);
             ConvertedProgram.Add($"IF ( {splitLine[0]} ) THEN //{splitLine[1]}");
             ConvertedProgram.Add($"{splitLine[1].Replace("set", "").Trim()} := 1;");
-            ConvertedProgram.Add($"END_IF;");
+            ConvertedProgram.Add($"END_IF;\n");
 
         }
 
@@ -585,7 +596,7 @@ namespace ParsingLib.Services
 
         private void HandleFinsi(int index)
         {
-            var line = ProgramToConvert[index].Replace("finsi", "END_IF;");
+            var line = ProgramToConvert[index].Replace("finsi", "END_IF;\n");
             ConvertedProgram.Add(line);
         }
 
@@ -680,7 +691,7 @@ namespace ParsingLib.Services
                 // BCD32 want BCD16 gaat blijkbaar maar van -999 tot 999 => bijgevolg ook DINT-INT converting
                 var splitLine = line.Replace("dtb", "@").Split('@');
 
-                line = $"{splitLine[1].Trim()} := DINT_TO_INT(BCD32_TO_DINT({splitLine[0].Trim()}));";
+                line = $"{splitLine[1].Trim()} := DINT_TO_WORD(BCD32_TO_DINT({splitLine[0].Trim()}));";
 
             }
             if (line.Contains("btd"))
@@ -689,7 +700,7 @@ namespace ParsingLib.Services
                 // BCD32 want BCD16 gaat blijkbaar maar van -999 tot 999 => bijgevolg ook DINT-INT converting
                 var splitLine = line.Replace("btd", "@").Split('@');
 
-                line = $"{splitLine[1].Trim()} := DINT_TO_BCD32(INT_TO_DINT({splitLine[0].Trim()}));";
+                line = $"{splitLine[1].Trim()} := DINT_TO_BCD32(WORD_TO_DINT({splitLine[0].Trim()}));";
             }
 
             ConvertedProgram.Add(line);
@@ -699,7 +710,7 @@ namespace ParsingLib.Services
         {
             if (ProgramToConvert[index].Contains("finval"))
             {
-                ConvertedProgram.Add(ProgramToConvert[index].Replace("finval", "END_IF;"));
+                ConvertedProgram.Add(ProgramToConvert[index].Replace("finval", "END_IF;\n"));
             }
             else
             {
@@ -779,7 +790,7 @@ namespace ParsingLib.Services
             ConvertedProgram.Add($"IF( {equalString[0].Trim()} AND {commaSplit[0].Trim()} ) THEN");
             ConvertedProgram.Add($"{commaSplit[0].Trim()} := 0;");
             ConvertedProgram.Add($"{commaSplit[1].Trim()} := 1;");
-            ConvertedProgram.Add($"END_IF;");
+            ConvertedProgram.Add($"END_IF;\n");
 
 
         }

@@ -15,6 +15,36 @@
                 <Button Name="btnAnalyzeFile" Click="BtnAnalyzeFile_Click" Height="40px"  Background="#FF88D5EC" Foreground="White" FontSize="18" >ANALYZE FILE</Button>
                 <Button Name="btnConvertFile" Click="BtnConvertFile_Click"  Height="40px"   FontSize="18" Background="#FFFF8383" >CONVERT FILE</Button>
                 <Separator Height="20px" />
+                <Label Content="Startadresses:"  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0 0 0 10" Padding="6,0"  FontSize="15px" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+
+                    <Label Content="Inputs:" Grid.Column="0"  Margin="0 0 0 0"   FontSize="15px" />
+                    <TextBox Text="0" x:Name="txtInputs" Width="80px"  Grid.Column="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="txtInputs_TextChanged" />
+                    <Label Content="Outputs:" Grid.Column="2"  Margin="0 0 0 0"  FontSize="15px" />
+                    <TextBox Text="0" x:Name="txtOutputs" Width="80px" Grid.Column="3" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="txtOutputs_TextChanged"  />
+                    <Label Content="Merkers:" Grid.Column="0" Grid.Row="1" Margin="0 0 0 0"  FontSize="15px" />
+                    <TextBox Text="0" x:Name="txtMerkers" Width="80px" Grid.Column="1" Grid.Row="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="txtMerkers_TextChanged"  />
+                    <Label Content="Merkerwords:" Grid.Column="2" Grid.Row="1" Margin="0 0 0 0"  FontSize="15px" />
+                    <TextBox Text="5000" x:Name="txtMerkerWords" Width="80px" Grid.Column="3" Grid.Row="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="txtMerkerWords_TextChanged"  />
+                    <Label Content="Z-bits:" Grid.Column="0" Grid.Row="2" Margin="0 0 0 0"   FontSize="15px" />
+                    <TextBox Text="900" x:Name="txtZBits" Width="80px" Grid.Column="1" Grid.Row="2" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="txtZBits_TextChanged" />
+
+                </Grid>
+
+
+                <Separator Height="20px" />
                 <Label  x:Name="TitleText2" Content="Source contains:"  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 10" Padding="6,0"  FontSize="20px" />
                 <TextBox Name="txtEditor" Height="200px" VerticalScrollBarVisibility="Visible" Padding="0" />
                 <Label  Name="TitleText3" Content="Converted files contain:" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10px" FontSize="20px"  Padding="6,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" BorderBrush="#00ABADB3"/>

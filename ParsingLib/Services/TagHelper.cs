@@ -18,6 +18,12 @@ namespace ParsingLib
         public List<List<String>> MatrixList { get; set; }
 
 
+        private int inp = 0;
+        private int outp = 0;
+        private int merk = 0;
+        private int merkw = 0;
+        private int zbit = 0;
+
         public TagHelper()
         {
             Variables = new List<string>();
@@ -79,9 +85,15 @@ namespace ParsingLib
 
         }
 
-        public void MakeTags()
+        public void MakeTags(int inp, int outp, int merk, int merkw, int zbit)
         {
             Variables.Sort();
+
+            this.inp = inp;
+            this.outp = outp;
+            this.merk = merk;
+            this.merkw = merkw;
+            this.zbit = zbit;
 
             foreach (var item in Variables)
             {
@@ -102,16 +114,16 @@ namespace ParsingLib
             switch (TagName[0])
             {
                 case 'B':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValueBool + 2}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValueBool + 2 + merk}.{TagName[4]}" };
                     break;
                 case 'W':
                     var newTagListW = new List<string> { TagName, $"%MW{decValueWord}" };
                     MatrixList.Add(newTagListW);
                     var offset = MatrixList.IndexOf(newTagListW);
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "Word", LogicalAddress = $"%MW{decValueWord + 5000 + (offset)}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "Word", LogicalAddress = $"%MW{decValueWord + merkw + (offset)}" };
                     break;
                 case 'J':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "Byte", LogicalAddress = $"%MB{decValueWord}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "Byte", LogicalAddress = $"%MB{decValueWord + merk}" };
                     break;
                 case 'H':
                     tagToBeAdded = new Tag { Name = TagName, DataType = "Byte", LogicalAddress = $"%MB{decValueWord + 1 }" };
@@ -129,10 +141,10 @@ namespace ParsingLib
                     tagToBeAdded = new Tag { Name = TagName, DataType = "Word", LogicalAddress = $"%MW{decValueWord}" };
                     break;
                 case 'E':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%I{decValueBool}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%I{decValueBool + inp}.{TagName[4]}" };
                     break;
                 case 'A':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%Q{decValueBool}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%Q{decValueBool + outp}.{TagName[4]}" };
                     break;
                 case 'P':
                     tagToBeAdded = new Tag { Name = TagName, DataType = "byte", LogicalAddress = $"%MB{decValueWord}" };
@@ -141,7 +153,7 @@ namespace ParsingLib
                     tagToBeAdded = new Tag { Name = TagName, DataType = "", LogicalAddress = $"" };
                     break;
                 case 'Z':
-                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValueBool + 2}.{TagName[4]}" };
+                    tagToBeAdded = new Tag { Name = TagName, DataType = "bool", LogicalAddress = $"%M{decValueBool + 2 + zbit}.{TagName[4]}" };
                     break;
                 default:
                     tagToBeAdded = null;
