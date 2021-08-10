@@ -123,7 +123,6 @@ namespace DBE_Parser
 
                 worksheet.Cells[headerRange].LoadFromArrays(headerRow);
 
-                tagHelper.MakeTags();
                 worksheet.Cells[2, 1].LoadFromCollection(tagHelper.TagList);
                 FileInfo excelFile = new FileInfo(path + "/TagTable.xlsx");
                 excel.SaveAs(excelFile);

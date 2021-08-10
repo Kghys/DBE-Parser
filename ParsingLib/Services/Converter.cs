@@ -28,15 +28,24 @@ namespace ParsingLib.Services
 
             for (int i = 0; i < ProgramToConvert.Count(); i++)
             {
-                var line = ProgramToConvert[i];
-                if (!(line.Trim() == ""))
+                try
                 {
-                    i = ConvertLine(line, i);
+                    var line = ProgramToConvert[i];
+                    if (!(line.Trim() == ""))
+                    {
+                        i = ConvertLine(line, i);
+                    }
+                    else
+                    {
+                        ConvertedProgram.Add($"");
+                    }
                 }
-                else
+                catch (Exception)
                 {
-                    ConvertedProgram.Add($"");
+
+                    throw new Exception($"FOUT OP LIJN {i} IN {BlockName}");
                 }
+
             }
             ConvertedProgram.Add($"");
             for (int i = 0; i < ProgramToConvert.Count(); i++)
@@ -75,6 +84,9 @@ namespace ParsingLib.Services
             if (Regex.IsMatch(programLine, @"(T[0-9]*[0-9]*[0-9]_[A-Z][0-9][0-9A-Z][0-9A-Z][0-9A-Z])")) { HandleTUnderscore(index); return newIndex; }
             if (programLine.Contains("= mr")) { newIndex = HandleMr(index); return newIndex; }
             if (programLine.Contains("gs ")) { HandleGS(index); return newIndex; }
+            if (programLine.Contains("pour_x_de ")) { HandlePourXDe(index); return newIndex; }
+            if (programLine.Contains("finpour")) { HandleFinPour(index); return newIndex; }
+            if (programLine.Contains("[") && programLine.Contains("]") && programLine.Contains("(X)")) { HandlePourCondition(index); return newIndex; }
             if (programLine.Contains("val")) { HandleVal(index); return newIndex; }
             if (programLine.Contains("tra ")) { HandleTra(index); return newIndex; }
             if (programLine.Contains("cal ")) { HandleCal(index); return newIndex; }
@@ -117,14 +129,40 @@ namespace ParsingLib.Services
             return newIndex;
         }
 
+        private void HandlePourCondition(int index)
+        {
+            // POKE(area:=16#83,  dbNumber:=0, byteOffset:=5000 + x,value:=0);
+            // log 16#0 = [W0000](X)
+
+            // logaritmische uitdrukking, bitwise vergelijkingen van AND, OR, XOR tussen woorden
+            var line = ProgramToConvert[index].Replace("log ", "");
+            var splitLine = line.Split('=');
+            line = $"POKE(area:=16#83,  dbNumber:=0, byteOffset:= {splitLine[1][3]}{splitLine[1][4]}{splitLine[1][5]}{splitLine[1][6]} + 5000 + x ,value := {splitLine[0].Trim()});";
+            ConvertedProgram.Add(line);
+
+        }
+
+        private void HandleFinPour(int index)
+        {
+
+            ConvertedProgram.Add("END_FOR;");
+        }
+
+        private void HandlePourXDe(int index)
+        {
+            string line = ProgramToConvert[index];
+            line = line.Replace("pour_x_de", "FOR x :=").Replace(", 16", "TO 16").Replace(", 1", "DO");
+            ConvertedProgram.Add(line);
+        }
+
         private string GetAdress(string tagName)
         {
-            tagName = tagName.Trim().Replace("\"","");
+            tagName = tagName.Trim().Replace("\"", "");
             string directAdress = "";
 
             if (tags.Where(t => t.Name == tagName).FirstOrDefault() != null)
             {
-                directAdress = tags.Where(t => t.Name == tagName).FirstOrDefault().LogicalAddress.Replace("%MW", "").Replace("%I","").Replace("%Q","");
+                directAdress = tags.Where(t => t.Name == tagName).FirstOrDefault().LogicalAddress.Replace("%MW", "").Replace("%I", "").Replace("%Q", "");
             }
             return directAdress;
         }
@@ -132,7 +170,7 @@ namespace ParsingLib.Services
         private void HandleX(int index)
         {
             //get line
-            var line = ProgramToConvert[index].Replace("trf ", ""); 
+            var line = ProgramToConvert[index].Replace("trf ", "");
             line = line.Replace("(X)", "");
             var splitLine = line.Split('=');
 
@@ -140,7 +178,7 @@ namespace ParsingLib.Services
             if (line.Contains("\"F"))
             {
                 string wordAddress = splitLine[1][3].ToString() + splitLine[1][4].ToString() + splitLine[1][5].ToString() + splitLine[1][6].ToString();
-                
+
                 var decValueWord = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
                 // "Timers".T[59].PT := "B0120";
                 splitLine[1] = $"\"Timers\".T[{decValueWord}].PT";
@@ -148,7 +186,7 @@ namespace ParsingLib.Services
                 string directAdress = GetAdress(splitLine[0]);
 
                 line = $"{splitLine[1]} := WORD_TO_TIME(PEEK_WORD(area:= 16#83, dbNumber := 0, byteOffset := {directAdress} + {ldx})*100);";
-                
+
             }
             ConvertedProgram.Add(line);
         }
@@ -210,7 +248,7 @@ namespace ParsingLib.Services
             }
             else
             {
-                if (Regex.IsMatch(newLine, @"([P][0-9][0-9A-Z][0-9A-Z][0-9A-Z])"))
+                if (Regex.IsMatch(newLine, @"([P][0-9][0-9A-Z][0-9A-Z][0-9A-Z])") && !newLine.Contains(']'));
                 {
                     HandleTrf(index);
                     return;
@@ -302,6 +340,7 @@ namespace ParsingLib.Services
 
                 }
 
+
                 if (ProgramToConvert[i].Contains("boo") && !ProgramToConvert[i].Contains("gs") && !ProgramToConvert[i].Contains("fm") && !ProgramToConvert[i].Contains("fd")
                     && !ProgramToConvert[i].Contains("set") && !ProgramToConvert[i].Contains("reset"))
                 {
@@ -328,6 +367,28 @@ namespace ParsingLib.Services
                         afterEqual = splitStringWithEqual[1];
 
                     }
+                    if (afterEqual.Contains("tm"))
+                    {
+                        string[] spaceSplit = afterEqual.Trim().Split(' ');
+
+                        for (int j = 0; j < spaceSplit.Length; j++)
+                        {
+
+                            if (spaceSplit[j].StartsWith("T"))
+                            {
+                                string wordAddress = spaceSplit[j][1].ToString() + spaceSplit[j][2].ToString() + spaceSplit[j][3].ToString() + spaceSplit[j][4].ToString();
+
+                                var decValueWord = int.Parse(wordAddress, System.Globalization.NumberStyles.HexNumber);
+                                // "Timers".T[59].IN := "B0120";
+                                afterEqual = $"Timers.T[{decValueWord}].IN";
+                            }
+
+                        }
+
+                        afterEqual = afterEqual.Trim();
+
+                    }
+
 
 
                     tagsToBeReset.Add($"\"{afterEqual.Trim()}\" := 0;");
@@ -570,9 +631,10 @@ namespace ParsingLib.Services
             if (line.Contains("T") && line.Contains("_"))
             {
                 splitLine[1] = "//" + splitLine[1];
-                splitLine[0] = splitLine[0] + "  NIET LANGER NODIG, PERIPH KAN RECHSTREEKS AANGESPROKEN WORDEN  ";
+                splitLine[0] = splitLine[0] + "  NIET LANGER NODIG, PERIPH KAN RECHTSTREEKS AANGESPROKEN WORDEN  ";
 
                 line = $"{splitLine[1]} := {splitLine[0]};";
+
             }
             //CATCH Word (decimal) into time, but has to be *100 because old times were in .1 second units
             if (line.Contains("\"F") && line.Contains("\"W"))
@@ -586,6 +648,7 @@ namespace ParsingLib.Services
                 splitLine[0] = "WORD_TO_TIME(" + splitLine[0].Trim() + " * 100)";
                 line = $"{splitLine[1]} := {splitLine[0]};";
                 ConvertedProgram.Add(line);
+                return;
             }
             if (line.Contains("\"F") && !line.Contains("\"W"))
             {
@@ -596,6 +659,12 @@ namespace ParsingLib.Services
                 splitLine[1] = $"\"Timers\".T[{decValueWord}].PT";
 
                 splitLine[0] = splitLine[0].Replace("10#", "T#").Trim() + "00ms";
+                line = $"{splitLine[1]} := {splitLine[0]};";
+                ConvertedProgram.Add(line.Replace("_", ".X"));
+                return;
+            }
+            else
+            {
                 line = $"{splitLine[1]} := {splitLine[0]};";
                 ConvertedProgram.Add(line.Replace("_", ".X"));
             }
