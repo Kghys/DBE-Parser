@@ -787,7 +787,7 @@ namespace ParsingLib.Services
             commaSplit[0] = commaSplit[0].Replace(" gs ", "");
             equalString[0] = HandleBooInsideCondition(equalString[0]);
 
-            ConvertedProgram.Add($"IF( {equalString[0].Trim()} AND {commaSplit[0].Trim()} ) THEN");
+            ConvertedProgram.Add($"IF(( {equalString[0].Trim()}) AND {commaSplit[0].Trim()} ) THEN");
             ConvertedProgram.Add($"{commaSplit[0].Trim()} := 0;");
             ConvertedProgram.Add($"{commaSplit[1].Trim()} := 1;");
             ConvertedProgram.Add($"END_IF;\n");
