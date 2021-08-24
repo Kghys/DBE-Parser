@@ -319,8 +319,10 @@ namespace ParsingLib.Services
                     gsString = gsString.Replace("gs", "");
                     string[] gsParts = gsString.Split('@');
                     string[] commaSplit = gsParts[1].Split(',');
-                    tagsToBeReset.Add($"\"{commaSplit[0].Trim()}\" := 0;");
-                    tagsToBeReset.Add($"\"{commaSplit[1].Trim()}\" := 0;");
+                    if(!tagsToBeReset.Contains($"\"{commaSplit[0].Trim()}\" := 0;")) tagsToBeReset.Add($"\"{commaSplit[0].Trim()}\" := 0;");
+                    if (!tagsToBeReset.Contains($"\"{commaSplit[1].Trim()}\" := 0;")) tagsToBeReset.Add($"\"{commaSplit[1].Trim()}\" := 0;");
+
+
 
                 }
 
@@ -401,8 +403,8 @@ namespace ParsingLib.Services
                     }
 
 
-
-                    tagsToBeReset.Add($"\"{afterEqual.Trim()}\" := 0;");
+                    if(!tagsToBeReset.Contains($"\"{afterEqual.Trim()}\" := 0;")) tagsToBeReset.Add($"\"{afterEqual.Trim()}\" := 0;");
+                    
 
                 }
 
